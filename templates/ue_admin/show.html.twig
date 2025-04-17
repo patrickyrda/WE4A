@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UE{% endblock %}
+
+{% block body %}
+    <h1>UE</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ u_e.id }}</td>
+            </tr>
+            <tr>
+                <th>Code</th>
+                <td>{{ u_e.code }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ u_e.title }}</td>
+            </tr>
+            <tr>
+                <th>Image_path</th>
+                <td>{{ u_e.imagePath }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_u_e_admin_index') }}">back to list</a>
+
+    <a href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">edit</a>
+
+    
+{% endblock %}

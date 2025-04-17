@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UE index{% endblock %}
+
+{% block body %}
+    <h1>UE index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Image_path</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u_e in u_es %}
+            <tr>
+                <td>{{ u_e.id }}</td>
+                <td>{{ u_e.code }}</td>
+                <td>{{ u_e.title }}</td>
+                <td>{{ u_e.imagePath }}</td>
+                <td>
+                    <a href="{{ path('app_u_e_admin_show', {'id': u_e.id}) }}">show</a>
+                    <a href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">edit</a>
+                    {{ include('ue_admin/_delete_form.html.twig') }}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_u_e_admin_new') }}">Create new</a>
+{% endblock %}
