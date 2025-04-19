@@ -24,15 +24,8 @@
                 <td>{{ u_e.imagePath }}</td>
                 <td>
                     <a href="{{ path('app_u_e_admin_show', {'id': u_e.id}) }}">show</a>
-                    <button class="btn btn-sm btn-primary" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#editUEModal"
-                        data-ue-id="{{ u_e.id }}"
-                        data-ue-code="{{ u_e.code }}"
-                        data-ue-title="{{ u_e.title }}"
-                        data-ue-image="{{ u_e.imagePath }}">
-                        Modifier
-                    </button>
+                    <a href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">edit</a>
+
 
                     {{ include('ue_admin/_delete_form.html.twig') }}
                 </td>
@@ -47,76 +40,7 @@
 
     <a href="{{ path('app_u_e_admin_new') }}">Create new</a>
 
-<!-- Modal UE -->
-<div class="modal fade" id="editUEModal" tabindex="-1" aria-labelledby="editUEModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Modifier l'UE</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editUEForm">
-          <input type="hidden" id="edit-ue-id" name="id">
-          <div class="mb-3">
-            <label for="edit-ue-code" class="form-label">Code</label>
-            <input type="text" class="form-control" id="edit-ue-code" name="code">
-          </div>
-          <div class="mb-3">
-            <label for="edit-ue-title" class="form-label">Titre</label>
-            <input type="text" class="form-control" id="edit-ue-title" name="title">
-          </div>
-          <div class="mb-3">
-            <label for="edit-ue-image" class="form-label">ImagePath</label>
-            <input type="text" class="form-control" id="edit-ue-image" name="imagePath">
-          </div>
-          <button type="submit" class="btn btn-success">Enregistrer</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 
-<script>
-  // Préremplir le modal UE
-  const ueModal = document.getElementById('editUEModal');
-  ueModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    document.getElementById('edit-ue-id').value = button.getAttribute('data-ue-id');
-    document.getElementById('edit-ue-code').value = button.getAttribute('data-ue-code');
-    document.getElementById('edit-ue-title').value = button.getAttribute('data-ue-title');
-    document.getElementById('edit-ue-image').value = button.getAttribute('data-ue-image');
-  });
-
-  // Ajax submit UE
-  document.getElementById('editUEForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const id = document.getElementById('edit-ue-id').value;
-    const code = document.getElementById('edit-ue-code').value;
-    const title = document.getElementById('edit-ue-title').value;
-    const imagePath = document.getElementById('edit-ue-image').value;
-
-    fetch('/ue/ajax-update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({ id, code, title, imagePath })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('UE modifiée !');
-        location.reload();
-      } else {
-        alert('Erreur : ' + data.error);
-      }
-    })
-    .catch(() => alert('Erreur AJAX'));
-  });
-</script>
 
 {% endblock %}
 

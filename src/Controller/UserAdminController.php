@@ -124,22 +124,5 @@ final class UserAdminController extends AbstractController{
         ]);
         /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
     }
-    
-    #[Route('/user/ajax-update', name: 'user_ajax_update', methods: ['POST'])]
-public function ajaxUpdate(Request $request, UserRepository $userRepo, EntityManagerInterface $em): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
-
-    $user = $userRepo->find($data['id'] ?? null);
-    if (!$user) {
-        return new JsonResponse(['success' => false, 'error' => 'Utilisateur non trouvé'], 404);
-    }
-
-    $user->setName($data['name']);
-    $user->setSurname($data['surname']);
-    $em->flush();
-
-    return new JsonResponse(['success' => true]);
-}
 
 }

@@ -22,14 +22,7 @@
                 <td>{{ post.date ? post.date|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
                     <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
-                    <button class="btn btn-sm btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editPostModal"
-                        data-post-id="{{ post.id }}"
-                        data-post-title="{{ post.title }}"
-                        data-post-content="{{ post.content|e('html_attr') }}">
-                        Modifier
-                    </button>
+                    <a href="{{ path('post_edit', {'id': post.id}) }}">Edit classique</a>
                 </td>
             </tr>
         {% else %}
@@ -41,68 +34,5 @@
     </table>
 
     <a href="{{ path('app_post_new') }}">Create new</a>
-
-<div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editPostModalLabel">Modifier le post</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editPostForm">
-          <input type="hidden" id="edit-post-id" name="id">
-          <div class="mb-3">
-            <label for="edit-post-title" class="form-label">Titre</label>
-            <input type="text" class="form-control" id="edit-post-title" name="title">
-          </div>
-          <div class="mb-3">
-            <label for="edit-post-content" class="form-label">Contenu</label>
-            <textarea class="form-control" id="edit-post-content" name="content" rows="4"></textarea>
-          </div>
-          <button type="submit" class="btn btn-success">Enregistrer</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  const modal = document.getElementById('editPostModal');
-  modal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    document.getElementById('edit-post-id').value = button.getAttribute('data-post-id');
-    document.getElementById('edit-post-title').value = button.getAttribute('data-post-title');
-    document.getElementById('edit-post-content').value = button.getAttribute('data-post-content');
-  });
-
-  document.getElementById('editPostForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const id = document.getElementById('edit-post-id').value;
-    const title = document.getElementById('edit-post-title').value;
-    const content = document.getElementById('edit-post-content').value;
-
-    fetch('/post/ajax-update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({ id, title, content })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Post modifié !');
-        location.reload();
-      } else {
-        alert('Erreur : ' + data.error);
-      }
-    })
-    .catch(() => alert('Erreur lors de la requête AJAX.'));
-  });
-</script>
-
 
 {% endblock %}
