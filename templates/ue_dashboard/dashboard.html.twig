@@ -1,0 +1,44 @@
+<h2>Mes UE</h2>
+<div id="my-ues">
+  Chargement des UE en cours...
+</div>
+
+<script>
+  function loadMyUes() {
+    fetch("/user/api/my-ues")
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById("my-ues");
+        container.innerHTML = ""; 
+
+        if (!data.success) {
+          container.innerHTML = "<p>Erreur : " + data.message + "</p>";
+          return;
+        }
+
+        if (data.ues.length === 0) {
+          container.innerHTML = "<p>Vous n\'êtes inscrit à aucune UE.</p>";
+          return;
+        }
+
+        data.ues.forEach(ue => {
+          const ueDiv = document.createElement("div");
+          ueDiv.innerHTML = `
+            <div class="ue-card">
+              <h3>${ue.title}</h3>
+              <p><strong>Code :</strong> ${ue.code}</p>
+              ${ue.image_path ? `<img src="/uploads/${ue.image_path}" alt="${ue.title}" width="100">` : ""}
+            </div>
+            <hr>
+          `;
+          container.appendChild(ueDiv);
+        });
+      })
+      .catch(error => {
+        document.getElementById("my-ues").innerHTML = "<p>Erreur lors du chargement des UEs.</p>";
+        console.error("Erreur fetch:", error);
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadMyUes);
+</script>

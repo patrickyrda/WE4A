@@ -97,4 +97,52 @@ final class UEDashboardController extends AbstractController{
 
         return $jsonResponse->success($data, 'Fetched UEs posts successfully');
     }
+
+    #[Route("/user/api/ue/add", name: "app_add_ue", methods: ["POST"])]
+    public function addUe(Request $request, EntityManagerInterface $em): JsonResponse {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(["error" => "Accès interdit"], 401);
+        }
+
+        $ueId = $request->request->get("ue_id");
+        if (!$ueId) {
+            return new JsonResponse(["error" => "ID de l\'UE invalide"], 400);
+        }
+
+        $ue = $em->getRepository(UE::class)->find($ueId);
+        if (!$ue) {
+            return new JsonResponse(["error" => "L\'UE n\'existe pas"], 404);
+        }
+        
+        foreach ($user->getInscriptions() as $inscription) {
+            if ($inscription->getUeId()->getId() === $ueId) {
+                return new JsonResponse(["message" => "Déjà inscrit"], 200);
+            }
+        }
+
+        $inscription = new Inscriptions();
+        $inscription->setUserId($user);
+        $inscription->setUeId($ue);
+
+        $em->persist($inscription);
+        $em->flush();
+
+        return new JsonResponse(["success" => true, "message" => "UE ajouté"]);
+    }
+
+    #[Route("/user/api/my_ues", name: "app_my_ues", methods: ["GET"])]
+    public function myUes(): JsonResponse {
+        $user = $this->getUser();
+        $ues = [];
+
+        foreach ($user->getInscriptions() as $inscription) {
+            $ues[] = [
+                "id" => $inscription->getUeId()->getId(),
+                "title" => $inscription->getUeId()->getTitle(),
+            ];
+        }
+
+        return new JsonResponse($ues);
+    }
 }
