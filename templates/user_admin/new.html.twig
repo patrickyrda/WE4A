@@ -1,11 +1,34 @@
-{% extends 'base.html.twig' %}
+{{ form_start(form, {
+  attr: {
+    id: 'userForm',
+    novalidate: 'novalidate'
+  }
+}) }}
 
-{% block title %}New User{% endblock %}
+  <div class="mb-3">
+    {{ form_label(form.email) }}
+    {{ form_widget(form.email, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.email) }}
+  </div>
 
-{% block body %}
-    <h1>Create new User</h1>
+  <div class="mb-3">
+    {{ form_label(form.password) }}
+    {{ form_widget(form.password, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.password) }}
+  </div>
 
-    {{ include('user_admin/_form.html.twig') }}
+  <div class="mb-3">
+    {{ form_label(form.name) }}
+    {{ form_widget(form.name, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.name) }}
+  </div>
 
-    <a href="{{ path('app_user_admin_index') }}">back to list</a>
-{% endblock %}
+  <div class="mb-3">
+    {{ form_label(form.surname) }}
+    {{ form_widget(form.surname, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.surname) }}
+  </div>
+
+  <button type="submit" class="btn btn-primary">Créer</button>
+
+{{ form_end(form) }}

@@ -3,98 +3,91 @@
 {% block title %}User index{% endblock %}
 
 {% block body %}
-    <h1>User index</h1>
+<h1>User index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Password</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-                <td>{{ user.password }}</td>
-                <td>{{ user.name }}</td>
-                <td>{{ user.surname }}</td>
-                <td>
-                    <a href="{{ path('app_user_admin_show', {'id': user.id}) }}">show</a>
-                    <a href="{{ path('app_user_admin_edit', {'id': user.id}) }}">edit</a>
-                    
+<table class="table">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Email</th>
+      <th>Roles</th>
+      <th>Password</th>
+      <th>Name</th>
+      <th>Surname</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
+        <td>{{ user.password }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.surname }}</td>
+        <td>
+          <a href="{{ path('app_user_admin_show', {'id': user.id}) }}">show</a>
 
-                    <button class="btn btn-success" id="openModifyUserModal"
-                      data-user-id="{{ user.id }}">
-                      Modifier 
-                    </button>
+          <button class="btn btn-success openModifyUserModal"
+                  data-user-id="{{ user.id }}">
+            Modifier
+          </button>
 
+          <button class="btn btn-danger delete-user-btn"
+                  data-user-id="{{ user.id }}"
+                  data-csrf-token="{{ csrf_token('delete' ~ user.id) }}">
+            Supprimer
+          </button>
+        </td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="7">no records found</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-                    <button class="btn btn-danger delete-user-btn"
-                      data-user-id="{{ user.id }}">
-                      Supprimer
-                    </button>
+<button class="btn btn-primary" id="openCreateUserModal">
+  Ajouter un utilisateur
+</button>
 
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <button class="btn btn-success" id="openCreateUserModal">
-      Ajouter un utilisateur
-    </button>
-
-<!-- Modal vide pour charger le formulaire via AJAX -->
+<!-- Modal unique pour créer / modifier -->
 <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="userModalLabel">Ajouter un utilisateur</h5>
+        <h5 class="modal-title" id="userModalLabel"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body" id="userModalBody">
-        <!-- Le formulaire sera injecté ici par Ajax -->
+        <!-- Formulaire injecté ici -->
       </div>
     </div>
   </div>
 </div>
 
 <script>
+  // AJOUTER
   document.getElementById('openCreateUserModal').addEventListener('click', function () {
     fetch('{{ path('app_user_admin_new') }}', {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(response => response.json())
     .then(data => {
+      document.getElementById('userModalLabel').textContent = 'Ajouter un utilisateur';
       document.getElementById('userModalBody').innerHTML = data.form;
       new bootstrap.Modal(document.getElementById('userModal')).show();
 
-      // Gérer la soumission du formulaire
       const form = document.querySelector('#userModalBody form');
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-
         const formData = new FormData(form);
 
         fetch('{{ path('app_user_admin_new') }}', {
           method: 'POST',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          },
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
           body: formData
         })
         .then(response => response.json())
@@ -109,50 +102,29 @@
       });
     });
   });
-</script>
 
-<!-- Modal pour modifier un utilisateur avec AJAX -->
-<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="userModalLabel">Modifier un utilisateur</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body" id="userModalBody">
-        <!-- Le formulaire sera injecté ici par Ajax -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
+  // MODIFIER
   document.querySelectorAll('.openModifyUserModal').forEach(button => {
     button.addEventListener('click', function () {
       const userId = button.getAttribute('data-user-id');
 
       fetch(`/user/${userId}/edit`, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
       .then(response => response.json())
       .then(data => {
+        document.getElementById('userModalLabel').textContent = 'Modifier un utilisateur';
         document.getElementById('userModalBody').innerHTML = data.form;
-        document.getElementById('userModalLabel').innerText = 'Modifier un utilisateur';
         new bootstrap.Modal(document.getElementById('userModal')).show();
 
         const form = document.querySelector('#userModalBody form');
         form.addEventListener('submit', function (e) {
           e.preventDefault();
-
           const formData = new FormData(form);
 
           fetch(`/user/${userId}/edit`, {
             method: 'POST',
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest'
-            },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
             body: formData
           })
           .then(response => response.json())
@@ -168,30 +140,31 @@
       });
     });
   });
-</script>
 
-<!-- Partie delete -->
-<script>
+  // SUPPRIMER
   document.querySelectorAll('.delete-user-btn').forEach(button => {
     button.addEventListener('click', function () {
       const userId = button.getAttribute('data-user-id');
+      const csrfToken = button.getAttribute('data-csrf-token');
 
-      if (!confirm('Confirmer la suppression de cet utilisateur ?')) {
-        return;
-      }
+      if (!confirm('Confirmer la suppression de cet utilisateur ?')) return;
 
       fetch(`/user/${userId}`, {
         method: 'POST',
         headers: {
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({ _method: 'DELETE' })
+        body: new URLSearchParams({
+          _method: 'DELETE',
+          _token: csrfToken
+        })
       })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
           alert('Utilisateur supprimé');
-          location.reload(); // ou retirer la ligne dynamiquement
+          location.reload();
         } else {
           alert('Erreur : ' + (data.error || 'Suppression échouée'));
         }
@@ -199,8 +172,4 @@
     });
   });
 </script>
-
-
 {% endblock %}
-
-

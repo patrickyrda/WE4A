@@ -1,13 +1,28 @@
-{% extends 'base.html.twig' %}
+{{ form_start(form, {
+  attr: {
+    id: 'ueForm',
+    novalidate: 'novalidate'
+  }
+}) }}
 
-{% block title %}Edit UE{% endblock %}
+  <div class="mb-3">
+    {{ form_label(form.code) }}
+    {{ form_widget(form.code, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.code) }}
+  </div>
 
-{% block body %}
-    <h1>Edit UE</h1>
+  <div class="mb-3">
+    {{ form_label(form.title) }}
+    {{ form_widget(form.title, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.title) }}
+  </div>
 
-    {{ include('ue_admin/_form.html.twig', {'button_label': 'Update'}) }}
+  <div class="mb-3">
+    {{ form_label(form.imagePath) }}
+    {{ form_widget(form.imagePath, { attr: { class: 'form-control' } }) }}
+    {{ form_errors(form.imagePath) }}
+  </div>
 
-    <a href="{{ path('app_u_e_admin_index') }}">back to list</a>
+  <button type="submit" class="btn btn-primary">Modifier</button>
 
-    {{ include('ue_admin/_delete_form.html.twig') }}
-{% endblock %}
+{{ form_end(form) }}
