@@ -25,7 +25,6 @@ final class UEDashboardController extends AbstractController{
         ]);
     }
 
-  
     /*
     *   User has to be logged in for the Api to return something
     *   In the js or html need to add a data-attribute with the ue_id that will be retrieved and then sent to the api/ueposts via GET 
@@ -57,7 +56,8 @@ final class UEDashboardController extends AbstractController{
 
     #[Route('/user/api/ueposts', name: 'app_ue_posts', methods: ['GET'])]
     /*
-    *   When sending a request to this endpoint, send the ue_id in a GET parameter. After retrieving the data use AJAX to load the posts and create a new route and template or 
+    *   When sending a request to this endpoint, send the ue_id in a GET parameter. This ue_id should be stored somewhere so it can be used later in the Post creation/modification. TODO:
+    *   After retrieving the data use AJAX to load the posts and create a new route and template or 
     *   use this route to automatically load  the posts in a page. In this case USE THE COMMENTED CODE and delete everything below
     */
     public function ueposts(PostRepository $postRepository, Request $request, JsonResponseService $jsonResponse): Response

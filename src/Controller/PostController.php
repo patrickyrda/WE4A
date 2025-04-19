@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\UERepository;
 
 #[Route('/post')]
 final class PostController extends AbstractController{
@@ -21,15 +22,35 @@ final class PostController extends AbstractController{
             'posts' => $postRepository->findAll(),
         ]);
     }
-
+    /*
+    *   User has to be logged in for the Api to return something and the ue_id has to be sent in the GET request
+    *
+    */
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository): Response
+    {   
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        $ue_id = $request->query->get('ue_id');
+        $ue  = $ueRepository->find($ue_id);
+        if (!$ue) {
+            throw $this->createNotFoundException('UE not found');
+        }
+
         $post = new Post();
+        $post->setUserId($user);
+        $post->setUeId($ue);
+        $post->setDate(new \DateTimeImmutable());
+
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $file = $form->get('file')->getData();
+
+            
             $entityManager->persist($post);
             $entityManager->flush();
 

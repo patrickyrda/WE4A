@@ -14,12 +14,11 @@ class FileType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('file_path')
-            ->add('post', EntityType::class, [
-                'class' => Post::class,
-'choice_label' => 'id',
-            ])
-        ;
+            ->add('uploaded_file', SymfonyFileType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Upload File',
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
