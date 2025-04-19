@@ -28,7 +28,15 @@
                 <td>{{ user.surname }}</td>
                 <td>
                     <a href="{{ path('app_user_admin_show', {'id': user.id}) }}">show</a>
-                    <a href="{{ path('app_user_admin_edit', {'id': user.id}) }}">edit</a>
+                    <button class="btn btn-sm btn-primary" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editUserModal"
+                        data-user-id="{{ user.id }}"
+                        data-user-name="{{ user.name }}"
+                        data-user-surname="{{ user.surname }}">
+                        Modifier
+                    </button>
+
                     {{ include('user_admin/_delete_form.html.twig') }}
                 </td>
             </tr>
@@ -41,4 +49,72 @@
     </table>
 
     <a href="{{ path('app_user_admin_new') }}">Create new</a>
+
+<!-- Modal de modification -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier l'utilisateur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <input type="hidden" name="id" id="edit-user-id">
+          <div class="mb-3">
+            <label for="edit-user-name" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="edit-user-name" name="name">
+          </div>
+          <div class="mb-3">
+            <label for="edit-user-surname" class="form-label">Prénom</label>
+            <input type="text" class="form-control" id="edit-user-surname" name="surname">
+          </div>
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Préremplir le modal
+  const modal = document.getElementById('editUserModal');
+  modal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    document.getElementById('edit-user-id').value = button.getAttribute('data-user-id');
+    document.getElementById('edit-user-name').value = button.getAttribute('data-user-name');
+    document.getElementById('edit-user-surname').value = button.getAttribute('data-user-surname');
+  });
+
+  // Ajax sur le formulaire
+  document.getElementById('editUserForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const id = document.getElementById('edit-user-id').value;
+    const name = document.getElementById('edit-user-name').value;
+    const surname = document.getElementById('edit-user-surname').value;
+
+    fetch('/user/ajax-update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ id, name, surname })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Utilisateur modifié !');
+        location.reload();
+      } else {
+        alert('Erreur : ' + data.error);
+      }
+    })
+    .catch(() => alert('Erreur lors de la requête.'));
+  });
+</script>
+
 {% endblock %}
+
+

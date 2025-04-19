@@ -1,0 +1,102 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    padding-top: 45px;
+}
+
+
+.bandeau {
+    background-color: royalblue; /* Couleur de fond noire */
+    padding: 40px;           /* Ajouter de l'espace intérieur */
+    display: flex;
+    position: fixed;
+    top: 0;                  /* Placer le bandeau en haut de la page */
+    left: 0;                 /* Placer le bandeau à gauche de l'écran */
+    width: 100%;             /* S'assurer qu'il occupe toute la largeur de la page */
+    z-index: 1000;           /* Placer le bandeau au-dessus des autres éléments */
+    box-sizing: border-box
+}
+
+.rectangle {
+    width: 92%;        /* Prend 80% de la largeur, donc 10% de marge de chaque côté */
+    height: auto;
+    min-height: 80%;
+    background-color: whitesmoke; /* Fond rectangle */
+    margin: 40px auto; /* Centre le rectangle avec un espace au-dessus */
+    display: flex;
+    justify-content: flex-start; /* Centre le contenu horizontalement */
+    border-radius: 10px; /* Coins arrondis */
+    flex-direction: column;
+}
+
+.rectangle p1 {
+    font-size: 30px;  /* Taille du texte */
+    font-weight: bold;  /* Texte en gras */
+    color: black;  /* Couleur du texte */
+    padding-left: 30px;
+    padding-top: 30px;
+}
+
+.rectangle p2 {
+    font-size: 20px;
+    font-weight: bold;
+    padding-left: 40px;
+    padding-top: 40px;
+}
+
+.separator {
+  border: none;
+  border-top: 2px solid #ddd; /* Ligne grise claire */
+  margin-top: 20px; /* Espace au-dessus de la ligne */
+  margin-bottom: 20px; /* Espace en dessous de la ligne */
+  margin-left: 40px;
+  margin-right: 40px;
+}
+
+.container {
+    display: flex;           /* Active Flexbox */
+    flex-wrap: wrap;         /* Permet le retour à la ligne */
+    justify-content: flex-start;  /* Aligne les éléments à gauche */
+    gap: 12px;               /* Espacement entre les éléments */
+    margin-left: 40px;
+    margin-top: 20px;
+    padding-bottom: 20px;  /* distance entre le bas du rectangle interne et externe */
+}
+
+.ue { 
+    border: 1px solid #ddd; 
+    background-color: #fff; 
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 480px;  /* Largeur fixe */
+    display: flex;
+    flex-direction: column;
+    height: 250px;
+}
+
+.ue .image-container {
+    flex: 1; /* Prend la moitié supérieure */
+    overflow: hidden;
+}
+
+.ue .image-container img {
+    width: 100%; /* L'image prend toute la largeur */
+    height: 100%; /* L'image prend toute la hauteur de la partie supérieure */
+    object-fit: cover; /* Pour garder l'image proportionnelle sans la déformer */
+}
+
+.ue .text-container {
+    flex: 1; /* Prend la moitié inférieure */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centre le texte verticalement */
+}
+
+h3, p {
+    margin: 5px 0; /* Espacement entre le code et l'intitulé */
+}
+
+

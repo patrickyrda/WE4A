@@ -10,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 
 #[Route('/post')]
 final class PostController extends AbstractController{
@@ -78,4 +80,23 @@ final class PostController extends AbstractController{
 
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
+#[Route('/post/ajax-update', name: 'post_ajax_update', methods: ['POST'])]
+public function ajaxUpdate(Request $request, PostRepository $postRepo, EntityManagerInterface $em): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+
+    $post = $postRepo->find($data['id'] ?? null);
+    if (!$post) {
+        return new JsonResponse(['success' => false, 'error' => 'Post non trouvé'], 404);
+    }
+
+    $post->setTitle($data['title']);
+    $post->setContent($data['content']);
+    $em->flush();
+
+    return new JsonResponse(['success' => true]);
+}
+
 }

@@ -116,4 +116,23 @@ final class UEAdminController extends AbstractController{
         ]);
         //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/ue/ajax-update', name: 'ue_ajax_update', methods: ['POST'])]
+public function ajaxUpdateUE(Request $request, UERepository $ueRepo, EntityManagerInterface $em): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+
+    $ue = $ueRepo->find($data['id'] ?? null);
+    if (!$ue) {
+        return new JsonResponse(['success' => false, 'error' => 'UE non trouvée'], 404);
+    }
+
+    $ue->setCode($data['code']);
+    $ue->setTitle($data['title']);
+    $ue->setImagePath($data['imagePath']);
+    $em->flush();
+
+    return new JsonResponse(['success' => true]);
+}
+
 }

@@ -1,0 +1,234 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    padding-top: 45px;
+}
+
+.bandeau {
+    background-color: royalblue; /* Couleur de fond noire */
+    padding: 40px;           /* Ajouter de l'espace intérieur */
+    display: flex;
+    position: fixed;
+    top: 0;                  /* Placer le bandeau en haut de la page */
+    left: 0;                 /* Placer le bandeau à gauche de l'écran */
+    width: 100%;             /* S'assurer qu'il occupe toute la largeur de la page */
+    z-index: 1000;           /* Placer le bandeau au-dessus des autres éléments */
+    box-sizing: border-box
+}
+
+.rectangle {
+    width: 92%;        /* Prend 80% de la largeur, donc 10% de marge de chaque côté */
+    height: auto;
+    min-height: 80%;
+    background-color: whitesmoke; /* Fond rectangle */
+    margin: 40px auto; /* Centre le rectangle avec un espace au-dessus */
+    display: flex;
+    justify-content: flex-start; /* Centre le contenu horizontalement */
+    border-radius: 10px; /* Coins arrondis */
+    flex-direction: column;
+}
+
+/* Conteneur principal */
+.container {
+    padding: 20px;
+    margin: 20px;
+}
+
+.button{
+    padding: 20px;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.pagination {
+    margin: 30px 0;
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.page-item {
+    display: inline-block;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.page-item .page-link {
+    padding: 10px 15px;
+    border: 1px solid #007bff;
+    color: #007bff;
+    background: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.page-item .page-link:hover {
+    background: #007bff;
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    border-color: #0056b3;
+}
+
+.delete-item {
+    color: red;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid red;
+    border-radius: 5px;
+    background-color: #ffe5e5;
+}
+
+.delete-item:hover {
+    background-color: red;
+    color: white;
+}
+
+.modify-item {
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid blue;
+    border-radius: 5px;
+    background-color: #e5e5ff;
+}
+
+.modify-item:hover {
+    background-color: blue;
+    color: white;
+}
+
+/* Style global pour la modale */
+.modal {
+    position: fixed; /* Fixe la modale à une position donnée */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fond sombre */
+    z-index: 9999; /* Pour que la modale soit au-dessus de tout */
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background-color: royalblue;
+    color: white;
+    padding: 2px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header .modal-title{
+    color: black ;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.modal-body {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.modal-footer {
+    background-color: lightgray;
+    padding: 10px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.modal-footer button {
+    border-radius: 5px;
+}
+
+/* Style pour les boutons dans le modal */
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Style pour la croix de fermeture */
+.close {
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+    opacity: 1;
+    margin-right: 0px;
+    background-color: darkred;
+    margin-right: 10px;
+}
+
+/* Pour la modale ouverte, ajouter une ombre */
+.modal-backdrop {
+    opacity: 0.5 !important;
+}
+
+/* Ajout d'espaces entre les éléments du formulaire */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Centrer le formulaire dans la modale */
+.form-control {
+    width: 90%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+/* Style du bouton d'ajout de nouvel item */
+#add_new_item, #add_new_student {
+    margin-top: 10px;
+}
+
+/* Style spécifique aux boutons pour la gestion de la page */
+#change_student, #change_ues, #add_new_item, #add_new_student {
+    display: inline-block;
+    margin-bottom: 15px;
+}
