@@ -29,9 +29,19 @@
                 <td>
                     <a href="{{ path('app_user_admin_show', {'id': user.id}) }}">show</a>
                     <a href="{{ path('app_user_admin_edit', {'id': user.id}) }}">edit</a>
+                    
+
+                    <button class="btn btn-success" id="openModifyUserModal"
+                      data-user-id="{{ user.id }}">
+                      Modifier 
+                    </button>
 
 
-                    {{ include('user_admin/_delete_form.html.twig') }}
+                    <button class="btn btn-danger delete-user-btn"
+                      data-user-id="{{ user.id }}">
+                      Supprimer
+                    </button>
+
                 </td>
             </tr>
         {% else %}
@@ -42,7 +52,153 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_admin_new') }}">Create new</a>
+    <button class="btn btn-success" id="openCreateUserModal">
+      Ajouter un utilisateur
+    </button>
+
+<!-- Modal vide pour charger le formulaire via AJAX -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">Ajouter un utilisateur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body" id="userModalBody">
+        <!-- Le formulaire sera injecté ici par Ajax -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('openCreateUserModal').addEventListener('click', function () {
+    fetch('{{ path('app_user_admin_new') }}', {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('userModalBody').innerHTML = data.form;
+      new bootstrap.Modal(document.getElementById('userModal')).show();
+
+      // Gérer la soumission du formulaire
+      const form = document.querySelector('#userModalBody form');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch('{{ path('app_user_admin_new') }}', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Utilisateur créé avec succès');
+            location.reload();
+          } else {
+            document.getElementById('userModalBody').innerHTML = data.form;
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<!-- Modal pour modifier un utilisateur avec AJAX -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">Modifier un utilisateur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body" id="userModalBody">
+        <!-- Le formulaire sera injecté ici par Ajax -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.openModifyUserModal').forEach(button => {
+    button.addEventListener('click', function () {
+      const userId = button.getAttribute('data-user-id');
+
+      fetch(`/user/${userId}/edit`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('userModalBody').innerHTML = data.form;
+        document.getElementById('userModalLabel').innerText = 'Modifier un utilisateur';
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+
+        const form = document.querySelector('#userModalBody form');
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+
+          fetch(`/user/${userId}/edit`, {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Utilisateur modifié avec succès');
+              location.reload();
+            } else {
+              document.getElementById('userModalBody').innerHTML = data.form;
+            }
+          });
+        });
+      });
+    });
+  });
+</script>
+
+<!-- Partie delete -->
+<script>
+  document.querySelectorAll('.delete-user-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const userId = button.getAttribute('data-user-id');
+
+      if (!confirm('Confirmer la suppression de cet utilisateur ?')) {
+        return;
+      }
+
+      fetch(`/user/${userId}`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams({ _method: 'DELETE' })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Utilisateur supprimé');
+          location.reload(); // ou retirer la ligne dynamiquement
+        } else {
+          alert('Erreur : ' + (data.error || 'Suppression échouée'));
+        }
+      });
+    });
+  });
+</script>
 
 
 {% endblock %}

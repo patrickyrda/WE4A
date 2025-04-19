@@ -116,13 +116,12 @@ final class UserAdminController extends AbstractController{
             $entityManager->remove($user);
             $entityManager->flush();
         }
+            // Si requête Ajax
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['success' => true]);
+            }
 
-
-        return $this->json([
-            'success' => true,
-            'message' => 'User deleted successfully'
-        ]);
-        /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
-    }
+            return $this->redirectToRoute('app_user_admin_index');
+        }
 
 }
