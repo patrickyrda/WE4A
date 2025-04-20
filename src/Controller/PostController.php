@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\File;
 use App\Form\PostType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UERepository;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 #[Route('/post')]
 final class PostController extends AbstractController{
@@ -27,7 +30,7 @@ final class PostController extends AbstractController{
     *
     */
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository, SluggerInterface $slugger): Response
     {   
         $user = $this->getUser();
         if (!$user) {
@@ -48,7 +51,29 @@ final class PostController extends AbstractController{
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $file = $form->get('file')->getData();
+            $uploadedFile = $form->get('file_path')->getData();
+
+            if ($uploadedFile) {
+                $filename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($filename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+
+                try
+                {
+                    $uploadedFile->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // Handle exception 
+                }
+
+                $file = new File();
+                $file->setFilePath($newFilename);
+
+                $post->addFile($file);
+                $entityManager->persist($file);
+            }
 
             
             $entityManager->persist($post);
@@ -71,6 +96,7 @@ final class PostController extends AbstractController{
         ]);
     }
 
+    //add logic to modify the file
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {

@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType as SymfonyFileType;
 
 
 class PostType extends AbstractType
@@ -17,12 +18,12 @@ class PostType extends AbstractType
     {
         $builder
             ->add('message')
-            ->add('files', CollectionType::class, [
-                'entry_type' => FileType::class,
-                'allow_add' => true,
-                'by_reference' => false, // so addFile() gets called
-                'mapped' => false,       // because we will manually handle it
+            ->add('file_path', SymfonyFileType::class, [
+                'label' => 'Upload File',
+                'mapped' => false, // important: we will handle the upload manually
+                'required' => false,
             ]);
+            
     }
 
     public function configureOptions(OptionsResolver $resolver): void
