@@ -1,5 +1,13 @@
-import { startStimulusApp } from '@symfony/stimulus-bundle';
+// assets/bootstrap.js
 
-const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+// on importe directement Stimulus depuis le dossier vendor
+import { Application } from './vendor/@hotwired/stimulus/stimulus.index.js';
+
+// puis on importe notre contrôleur
+import UeDashboardController from './controllers/ue_dashboard_controller.js';
+
+// et on enregistre tout manuellement
+const application = Application.start();
+application.register('ue-dashboard', UeDashboardController);
+
+console.log('Stimulus + UE Dashboard branché');

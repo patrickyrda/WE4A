@@ -1,10 +1,10 @@
 import './bootstrap.js';
-/*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
- */
 import './styles/app.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+import { Application } from '@hotwired/stimulus';
+import UeDashboardController from './controllers/ue_dashboard_controller.js';
+
+window.Stimulus = Application.start();
+Stimulus.register('ue-dashboard', UeDashboardController);
+
+console.log('Stimulus chargé et ue-dashboard branché');

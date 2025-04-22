@@ -1,21 +1,145 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        {% block stylesheets %}
-        {% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-..."
+      crossorigin="anonymous"
+    />
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+<div data-controller="ue-dashboard">
+  <ul id="ue-list">
+    {% for ue in ues %}
+      <li class="ue-item" data-ue-id="{{ ue.id }}">
+        <strong>{{ ue.title }}</strong>
+        <button
+          class="btn btn-sm btn-primary"
+          data-action="click->ue-dashboard#ouvrirModal"
+        >Ajouter un étudiant</button>
+        <ul class="student-list">
+          {% for ins in ue.inscriptions %}
+            <li data-user-id="{{ ins.userId.id }}">
+              {{ ins.userId.name }} {{ ins.userId.surname }}
+            </li>
+          {% else %}
+            <li>Aucun étudiant</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    </body>
+  <div class="modal fade" id="ajoutEtudiantModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Ajouter un étudiant</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <select class="form-select" data-ue-dashboard-target="etudiantSelect">
+            {% for et in etudiants %}
+              <option value="{{ et.id }}">{{ et.name }} {{ et.surname }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Annuler</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-ue-dashboard-target="validerBtn"
+            data-action="click->ue-dashboard#validerAjout"
+          >Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="module-shim">
+import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js'
+const application = Application.start()
+
+class UeDashboardController extends Controller {
+  static targets = ['etudiantSelect','validerBtn']
+
+  connect() {
+    this.fullOptions = Array.from(this.etudiantSelectTarget.options)
+      .map(opt => opt.cloneNode(true))
+  }
+
+  ouvrirModal(event) {
+    this.currentUeElement = event.currentTarget.closest('.ue-item')
+    this.currentUeId = this.currentUeElement.dataset.ueId
+
+    this.etudiantSelectTarget.innerHTML = ''
+
+    const enrolledIds = Array.from(
+      this.currentUeElement.querySelectorAll('.student-list li[data-user-id]')
+    ).map(li => li.dataset.userId)
+
+    this.fullOptions.forEach(opt => {
+      if (!enrolledIds.includes(opt.value)) {
+        this.etudiantSelectTarget.append(opt.cloneNode(true))
+      }
+    })
+
+    this.validerBtnTarget.disabled = this.etudiantSelectTarget.options.length === 0
+
+    this.modal = new bootstrap.Modal(
+      document.getElementById('ajoutEtudiantModal')
+    )
+    this.modal.show()
+  }
+
+  validerAjout() {
+    const ueId = this.currentUeId
+    const studentId = this.etudiantSelectTarget.value
+
+    fetch('/user/api/add_student', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ ue_id: ueId, student_id: studentId })
+    })
+    .then(r => r.json())
+    .then(() => {
+      this.modal.hide()
+      const nom = this.etudiantSelectTarget.selectedOptions[0].text
+      const ul = this.currentUeElement.querySelector('.student-list')
+      const li = document.createElement('li')
+      li.textContent = nom
+      li.dataset.userId = studentId
+      ul.appendChild(li)
+      const opt = this.etudiantSelectTarget.querySelector(
+        `option[value="${studentId}"]`
+      )
+      if (opt) opt.remove()
+    })
+    .catch(err => console.error(err))
+  }
+}
+
+application.register('ue-dashboard', UeDashboardController)
+</script>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-..."
+  crossorigin="anonymous"
+></script>
+</body>
 </html>

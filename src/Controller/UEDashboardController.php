@@ -11,20 +11,32 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\JsonResponseService;
 
-use App\Entity\UEs;
+use App\Entity\UE;
 use App\Entity\User;
 use App\Entity\Inscriptions;
 use App\Repository\PostRepository;
+use App\Repository\UERepository;
+use App\Repository\UserRepository;
 
 final class UEDashboardController extends AbstractController{
     #[Route('/user/dashboard', name: 'app_user_dashboard')]
-    public function index(): Response
-    {
+    #[IsGranted('ROLE_USER')]
+    public function index(
+        UERepository $ueRepository,
+        UserRepository $userRepository
+    ): Response {
+        $utilisateur = $this->getUser();
+        $inscriptions = $utilisateur->getInscriptions();
+        $ues = $inscriptions->map(fn($i) => $i->getUeId());
+        $etudiants = array_filter(
+            $userRepository->findAll(),
+            fn($u) => in_array('ROLE_STUDENT', $u->getRoles())
+        );
         return $this->render('ue_dashboard/index.html.twig', [
-            'controller_name' => 'UEDashboardController',
+            'ues' => $ues,
+            'etudiants' => $etudiants,
         ]);
     }
-
     /*
     *   User has to be logged in for the Api to return something
     *   In the js or html need to add a data-attribute with the ue_id that will be retrieved and then sent to the api/ueposts via GET 
@@ -97,4 +109,40 @@ final class UEDashboardController extends AbstractController{
 
         return $jsonResponse->success($data, 'Fetched UEs posts successfully');
     }
+
+    #[Route('/user/api/add_student', name: 'user_api_add_student', methods: ['POST'])]
+public function ajouterEtudiant(Request $request, EntityManagerInterface $em): JsonResponse
+{
+    try {
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $ueId       = $data['ue_id']      ?? null;
+        $studentId  = $data['student_id'] ?? null;
+    } catch (\JsonException $e) {
+        return new JsonResponse(['success'=>false,'message'=>'JSON invalide'], 400);
+    }
+
+    if (!$ueId || !$studentId) {
+        return new JsonResponse(['success'=>false,'message'=>'Paramètres manquants'], 400);
+    }
+
+    $ue       = $em->getRepository(UE::class)->find($ueId);
+    $etud     = $em->getRepository(User::class)->find($studentId);
+    if (!$ue || !$etud) {
+        return new JsonResponse(['success'=>false,'message'=>'UE ou étudiant introuvable'], 404);
+    }
+
+    try {
+        $insc = new Inscriptions();
+        $insc->setUeId($ue)->setUserId($etud);
+        $em->persist($insc);
+        $em->flush();
+    } catch (\Throwable $e) {
+        return new JsonResponse([
+            'success' => false,
+            'message' => 'Erreur lors de l’enregistrement : '.$e->getMessage()
+        ], 500);
+    }
+
+    return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
+}
 }
