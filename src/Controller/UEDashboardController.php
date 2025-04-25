@@ -111,38 +111,37 @@ final class UEDashboardController extends AbstractController{
     }
 
     #[Route('/user/api/add_student', name: 'user_api_add_student', methods: ['POST'])]
-public function ajouterEtudiant(Request $request, EntityManagerInterface $em): JsonResponse
-{
-    try {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $ueId       = $data['ue_id']      ?? null;
-        $studentId  = $data['student_id'] ?? null;
-    } catch (\JsonException $e) {
-        return new JsonResponse(['success'=>false,'message'=>'JSON invalide'], 400);
-    }
+    public function ajouterEtudiant(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            $ueId       = $data['ue_id']      ?? null;
+            $studentId  = $data['student_id'] ?? null;
+        } catch (\JsonException $e) {
+            return new JsonResponse(['success'=>false,'message'=>'JSON invalide'], 400);
+        }
 
-    if (!$ueId || !$studentId) {
-        return new JsonResponse(['success'=>false,'message'=>'Paramètres manquants'], 400);
-    }
+        if (!$ueId || !$studentId) {
+            return new JsonResponse(['success'=>false,'message'=>'Paramètres manquants'], 400);
+        }
 
-    $ue       = $em->getRepository(UE::class)->find($ueId);
-    $etud     = $em->getRepository(User::class)->find($studentId);
-    if (!$ue || !$etud) {
-        return new JsonResponse(['success'=>false,'message'=>'UE ou étudiant introuvable'], 404);
-    }
+        $ue       = $em->getRepository(UE::class)->find($ueId);
+        $etud     = $em->getRepository(User::class)->find($studentId);
+        if (!$ue || !$etud) {
+            return new JsonResponse(['success'=>false,'message'=>'UE ou étudiant introuvable'], 404);
+        }
 
-    try {
-        $insc = new Inscriptions();
-        $insc->setUeId($ue)->setUserId($etud);
-        $em->persist($insc);
-        $em->flush();
-    } catch (\Throwable $e) {
-        return new JsonResponse([
-            'success' => false,
-            'message' => 'Erreur lors de l’enregistrement : '.$e->getMessage()
-        ], 500);
+        try {
+            $insc = new Inscriptions();
+            $insc->setUeId($ue)->setUserId($etud);
+            $em->persist($insc);
+            $em->flush();
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Erreur lors de l’enregistrement : '.$e->getMessage()
+            ], 500);
+        }
+            return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
+        }
     }
-
-    return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
-}
-}
