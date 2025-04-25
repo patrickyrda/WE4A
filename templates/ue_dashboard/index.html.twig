@@ -1,54 +1,139 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tableau de bord UE{% endblock %}
+{% block title %}Mes UE{% endblock %}
 
 {% block body %}
-<h1>Mes UE</h1>
-<div data-controller="ue-dashboard">
-  <ul id="ue-list">
+<div class="container my-5" data-controller="ue-dashboard">
+  <h1 class="mb-4">Mes UE</h1>
+  <div class="row">
     {% for ue in ues %}
-      <li class="ue-item" data-ue-id="{{ ue.id }}">
-        <strong>{{ ue.title }}</strong>
-        <button class="btn btn-sm btn-primary"
-                data-action="click->ue-dashboard#ouvrirModal">
-          Ajouter un étudiant
-        </button>
-        <ul class="student-list">
-          {% for inscription in ue.inscriptions %}
-            <li data-user-id="{{ inscription.userId.id }}">
-                {{ inscription.userId.name }} {{ inscription.userId.surname }}
-            </li>
-          {% else %}
-            <li>Aucun étudiant</li>
-          {% endfor %}
-        </ul>
-      </li>
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          {% if ue.imagePath %}
+            <img src="{{ ue.imagePath }}" class="card-img-top" alt="{{ ue.title }}">
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ ue.title }}</h5>
+            <p class="card-text text-muted">{{ ue.code }}</p>
+            <h6 class="mt-3">Étudiants</h6>
+            <ul class="list-group list-group-flush mb-3 flex-grow-1 student-list">
+              {% for ins in ue.inscriptions %}
+                <li class="list-group-item py-1" data-user-id="{{ ins.userId.id }}">
+                  {{ ins.userId.name }} {{ ins.userId.surname }}
+                </li>
+              {% else %}
+                <li class="list-group-item py-1">Aucun étudiant</li>
+              {% endfor %}
+            </ul>
+            <button
+              class="btn btn-primary mt-auto"
+              data-action="click->ue-dashboard#ouvrirModal"
+            >Ajouter un étudiant</button>
+          </div>
+        </div>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 
-   <div class="modal fade" id="ajoutEtudiantModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+  <div class="modal fade" id="ajoutEtudiantModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header border-0">
           <h5 class="modal-title">Ajouter un étudiant</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <select class="form-select" data-ue-dashboard-target="etudiantSelect">
-            {% for etudiant in etudiants %}
-              <option value="{{ etudiant.id }}">{{ etudiant.name }} {{ etudiant.surname }}</option>
+            {% for et in etudiants %}
+              <option value="{{ et.id }}" data-full>
+                {{ et.name }} {{ et.surname }}
+              </option>
             {% endfor %}
           </select>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary"
-                  data-action="click->ue-dashboard#validerAjout">
-            Valider
-          </button>
+        <div class="modal-footer border-0">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Annuler</button>
+          <button
+            type="button"
+            class="btn btn-success"
+            data-ue-dashboard-target="validerBtn"
+            data-action="click->ue-dashboard#validerAjout"
+          >Valider</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="module-shim">
+import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js'
+const application = Application.start()
+
+class UeDashboardController extends Controller {
+  static targets = ['etudiantSelect','validerBtn']
+
+  connect() {
+    this.fullOptions = Array.from(this.etudiantSelectTarget.options)
+      .map(o => o.cloneNode(true))
+  }
+
+  ouvrirModal(e) {
+    this.currentUeElement = e.currentTarget.closest('.ue-item') || 
+      e.currentTarget.closest('.card').querySelector('.student-list').parentElement.closest('.ue-item')
+    this.currentUeId = this.currentUeElement.dataset.ueId
+    this.etudiantSelectTarget.innerHTML = ''
+    const enrolled = Array.from(
+      this.currentUeElement.querySelectorAll('.student-list li[data-user-id]')
+    ).map(li => li.dataset.userId)
+    this.fullOptions.forEach(opt => {
+      if (!enrolled.includes(opt.value)) {
+        this.etudiantSelectTarget.append(opt.cloneNode(true))
+      }
+    })
+    this.validerBtnTarget.disabled = !this.etudiantSelectTarget.options.length
+    this.modal = new bootstrap.Modal(document.getElementById('ajoutEtudiantModal'))
+    this.modal.show()
+  }
+
+  validerAjout() {
+    fetch('/user/api/add_student', {
+      method: 'POST',
+      headers: {
+        'Accept':'application/json',
+        'Content-Type':'application/json',
+        'X-Requested-With':'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        ue_id: this.currentUeId,
+        student_id: this.etudiantSelectTarget.value
+      })
+    })
+    .then(r => r.json())
+    .then(() => {
+      this.modal.hide()
+      const nom = this.etudiantSelectTarget.selectedOptions[0].text
+      const ul = this.currentUeElement.querySelector('.student-list')
+      const li = document.createElement('li')
+      li.classList.add('list-group-item','py-1')
+      li.textContent = nom
+      li.dataset.userId = this.etudiantSelectTarget.value
+      ul.appendChild(li)
+      const opt = this.etudiantSelectTarget.querySelector(
+        `option[value="${li.dataset.userId}"]`
+      )
+      if (opt) opt.remove()
+    })
+    .catch(console.error)
+  }
+}
+
+application.register('ue-dashboard', UeDashboardController)
+  </script>
 {% endblock %}
