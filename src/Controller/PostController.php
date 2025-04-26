@@ -79,12 +79,22 @@ final class PostController extends AbstractController{
             $entityManager->persist($post);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            //return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->json([
+                'success' => true,
+                'message' => 'Post created successfully'
+            ]);
         }
 
-        return $this->render('post/new.html.twig', [
+        /*return $this->render('post/new.html.twig', [
             'post' => $post,
             'form' => $form,
+        ]);*/
+        return $this->json([
+            'form' => $this->renderView('post/_form.html.twig', [
+                'post' => $post,
+                'form' => $form->createView(),
+            ])
         ]);
     }
 
@@ -98,20 +108,66 @@ final class PostController extends AbstractController{
 
     //add logic to modify the file
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            
+            $uploadedFile = $form->get('file_path')->getData();
+
+            if ($uploadedFile) {
+                foreach ($post->getFiles() as $existingFile) {    
+                    $oldFilePath = $this->getParameter('uploads_directory').'/'.$existingFile->getFilePath();
+
+                    if (file_exists($oldFilePath)) {
+                        unlink($oldFilePath);
+                    }
+
+                    $post->removeFile($existingFile);
+                    $entityManager->remove($existingFile);
+                }
+
+                $filename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($filename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+
+                try {
+                    $uploadedFile->move(
+                        $this->getParameter('uploads_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // Handle upload exception if needed
+                }
+
+                $file = new File();
+                $file->setFilePath($newFilename);
+
+                $post->addFile($file);
+                $entityManager->persist($file);
+            }
+
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            //return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->json([
+                'success' => true,
+                'message' => 'Post updated successfully'
+            ]);
         }
 
-        return $this->render('post/edit.html.twig', [
+        /*return $this->render('post/edit.html.twig', [
             'post' => $post,
             'form' => $form,
+        ]);*/
+
+        return $this->json([
+            'form' => $this->renderView('post/_form.html.twig', [
+                'post' => $post,
+                'form' => $form->createView(),
+            ])
         ]);
     }
 

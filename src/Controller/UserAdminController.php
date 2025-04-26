@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/user/admin')]
 final class UserAdminController extends AbstractController{
@@ -38,16 +39,17 @@ final class UserAdminController extends AbstractController{
     }
     //HERE HAVE TO FIX TO ADD THE HASHED PASSWORD!
     #[Route('/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->persist($user);
             $entityManager->flush();
-
             /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
             //TODO: Answer to Ajax request, when receiving succes you need to reload the window
             return $this->json([
@@ -63,8 +65,8 @@ final class UserAdminController extends AbstractController{
 
         return $this->json([
                 'form' => $this->renderView('user_admin/_form.html.twig', [
-                'user' => $user,
-                'form' => $form->createView(),
+                    'user' => $user,
+                    'form' => $form->createView(),
                 ])
             ]);
     }
@@ -78,30 +80,34 @@ final class UserAdminController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->flush();
 
-            /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
+            //return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);
             return $this->json([
                 'success' => true,
-                'message' => 'User updated successfully']);
+                'message' => 'User updated successfully'
+            ]);
         }
 
-        /*return $this->render('user_admin/edit.html.twig', [
+        return $this->render('user_admin/edit.html.twig', [
             'user' => $user,
             'form' => $form,
-        ]);*/
-        return $this->json([
+        ]);
+        /*return $this->json([
             'form' => $this->renderView('user_admin/_form.html.twig', [
                 'user' => $user,
                 'form' => $form->createView(),
                 ])
-            ]);
+            ]);*/
     }
 
     /*

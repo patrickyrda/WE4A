@@ -143,5 +143,33 @@ final class UEDashboardController extends AbstractController{
             ], 500);
         }
             return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
-        }
     }
+
+
+    #[Route('/user/api/get_news', name: 'user_api_get_news')]
+    public function getNews(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse) : Response 
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $conn = $entityManager->getConnection();
+
+        $query = 'SELECT u.code ,p.message, p.date FROM post p 
+        INNER JOIN ue u ON p.ue_id_id = u.id 
+        INNER JOIN inscriptions i ON  i.ue_id_id = u.id
+        WHERE i.user_id_id = :user_id
+        ORDER BY p.date DESC LIMIT 15';
+
+        $stmt = $conn->prepare($query);
+        $result = $stmt->executeQuery(['user_id' => $user->getId()]);
+
+        $newposts = $result->fetchAllAssociative();
+
+        return $jsonResponse->success($newposts, 'Fetched most recent posts successfully');
+    }
+
+    }
+
+
