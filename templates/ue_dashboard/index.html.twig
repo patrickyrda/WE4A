@@ -1,3 +1,4 @@
+{# templates/ue_dashboard/index.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Mes UE{% endblock %}
@@ -7,7 +8,7 @@
   <h1 class="mb-4">Mes UE</h1>
   <div class="row">
     {% for ue in ues %}
-      <div class="col-md-4 mb-4">
+      <div class="col-md-4 mb-4 ue-item" data-ue-id="{{ ue.id }}">
         <div class="card h-100 shadow-sm">
           {% if ue.imagePath %}
             <img src="{{ ue.imagePath }}" class="card-img-top" alt="{{ ue.title }}">
@@ -45,18 +46,12 @@
         <div class="modal-body">
           <select class="form-select" data-ue-dashboard-target="etudiantSelect">
             {% for et in etudiants %}
-              <option value="{{ et.id }}" data-full>
-                {{ et.name }} {{ et.surname }}
-              </option>
+              <option value="{{ et.id }}">{{ et.name }} {{ et.surname }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="modal-footer border-0">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >Annuler</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
           <button
             type="button"
             class="btn btn-success"
@@ -85,12 +80,12 @@ class UeDashboardController extends Controller {
   }
 
   ouvrirModal(e) {
-    this.currentUeElement = e.currentTarget.closest('.ue-item') || 
-      e.currentTarget.closest('.card').querySelector('.student-list').parentElement.closest('.ue-item')
-    this.currentUeId = this.currentUeElement.dataset.ueId
+    const container = e.currentTarget.closest('.ue-item')
+    this.currentUeElement = container
+    this.currentUeId = container.dataset.ueId
     this.etudiantSelectTarget.innerHTML = ''
     const enrolled = Array.from(
-      this.currentUeElement.querySelectorAll('.student-list li[data-user-id]')
+      container.querySelectorAll('.student-list li[data-user-id]')
     ).map(li => li.dataset.userId)
     this.fullOptions.forEach(opt => {
       if (!enrolled.includes(opt.value)) {
@@ -98,7 +93,9 @@ class UeDashboardController extends Controller {
       }
     })
     this.validerBtnTarget.disabled = !this.etudiantSelectTarget.options.length
-    this.modal = new bootstrap.Modal(document.getElementById('ajoutEtudiantModal'))
+    this.modal = new bootstrap.Modal(
+      document.getElementById('ajoutEtudiantModal')
+    )
     this.modal.show()
   }
 
