@@ -170,7 +170,7 @@ final class PostController extends AbstractController{
             ])
         ]);
     }
-
+/*
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
@@ -182,3 +182,25 @@ final class PostController extends AbstractController{
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
 }
+*/
+    
+# Pour eviter les bugs en AJAX  
+#[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
+public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
+{
+    if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->getPayload()->getString('_token'))) {
+        $entityManager->remove($post);
+        $entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Post supprimé avec succès.'
+        ]);
+    }
+
+    return $this->json([
+        'success' => false,
+        'message' => 'Token CSRF invalide.'
+    ], Response::HTTP_BAD_REQUEST);
+}
+
