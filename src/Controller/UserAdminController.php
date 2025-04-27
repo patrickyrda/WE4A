@@ -14,17 +14,25 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-#[Route('/user/admin')]
 final class UserAdminController extends AbstractController{
-    #[Route(name: 'app_user_admin_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    #[Route('/user/admin', name: 'app_user_admin_index')]
+    public function index(UserRepository $userRepository, Request $request): Response
     {   
-        $html = $this->renderView('user_admin/index.html.twig', [
-            'users' => $userRepository->findAll(),
+        $users = $userRepository->findAll();;
+        if ($request->isXmlHttpRequest()) {
+            $html = $this->renderView('user_admin/_table.html.twig', [
+                'users' => $users,
+            ]);
+    
+            return $this->json([
+                'success' => true,
+                'html'    => $html,
+            ]);
+        }
+    
+        return $this->render('user_admin/index.html.twig', [
+            'users' => $users,
         ]);
-
-        // Return plain HTML instead of JSON
-        return new Response($html);
     }
     //HERE HAVE TO FIX TO ADD THE HASHED PASSWORD!
     #[Route('/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]

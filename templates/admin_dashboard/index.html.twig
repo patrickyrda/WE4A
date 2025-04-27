@@ -3,38 +3,79 @@
 {% block title %}Tableau de bord Admin{% endblock %}
 
 {% block body %}
-<div data-controller="admin-dashboard">
-  <h1>Administration</h1>
+  <div data-controller="admin-dashboard">
+    <h1>Administration</h1>
 
-  <div class="mb-4">
-    <button
-      type="button"
-      class="btn btn-primary me-2"
-      data-action="click->admin-dashboard#loadUeTable"
-    >
-      Gérer les UE
-    </button>
+    <div class="mb-4">
+      <button
+        type="button"
+        class="btn btn-primary me-2"
+        data-action="click->admin-dashboard#loadUeTable"
+      >
+        Gérer les UE
+      </button>
 
-    <button
-      type="button"
-      class="btn btn-secondary"
-      data-action="click->admin-dashboard#loadUserTable"
-    >
-      Gérer les utilisateurs
-    </button>
-  </div>
-
-  <!-- Containers pour charger dynamiquement les tables -->
-  <div id="ue-table-container" data-admin-dashboard-target="ueContainer"></div>
-  <div id="user-table-container" data-admin-dashboard-target="userContainer"></div>
-
-  <!-- Modal pour afficher Voir / Modifier -->
-  <div class="modal fade" id="modalAdmin" tabindex="-1" aria-hidden="true" data-admin-dashboard-target="modal">
-    <div class="modal-dialog">
-      <div class="modal-content" data-admin-dashboard-target="modalContent">
-        <!-- Contenu AJAX du modal injecté ici -->
-      </div>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        data-action="click->admin-dashboard#loadUserTable"
+      >
+        Gérer les utilisateurs
+      </button>
     </div>
+
+    <div id="ue-table-container"></div>
+    <div id="user-table-container"></div>
   </div>
-</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="module">
+    import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    const application = Application.start();
+
+    class AdminDashboardController extends Controller {
+      loadUeTable(event) {
+        event.preventDefault();
+        this._fetchAndInject(
+          '{{ path('app_u_e_admin_index') }}',
+          'ue-table-container'
+        );
+      }
+
+      loadUserTable(event) {
+        event.preventDefault();
+        this._fetchAndInject(
+          '{{ path('app_user_admin_index') }}',
+          'user-table-container'
+        );
+      }
+
+      _fetchAndInject(url, containerId) {
+        // vide l'autre container pour simplicité
+        if (containerId === 'ue-table-container') {
+          document.getElementById('user-table-container').innerHTML = '';
+        } else {
+          document.getElementById('ue-table-container').innerHTML = '';
+        }
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(r => {
+            if (!r.ok) throw new Error(`Status ${r.status}`);
+            return r.json();
+          })
+          .then(json => {
+            if (json.success) {
+              document.getElementById(containerId).innerHTML = json.html;
+            } else {
+              console.error('Erreur AJAX', json);
+            }
+          })
+          .catch(err => console.error('Erreur AJAX', err));
+      }
+    }
+
+    application.register('admin-dashboard', AdminDashboardController);
+  </script>
 {% endblock %}

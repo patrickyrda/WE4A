@@ -1,0 +1,30 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Roles</th>
+      <th>Prénom</th>
+      <th>Nom</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.email }}</td>
+        <td>{{ user.roles|join(', ') }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.surname }}</td>
+        <td>
+          <a class="btn btn-sm btn-info"   href="{{ path('app_user_admin_show', {id: user.id}) }}">Voir</a>
+          <a class="btn btn-sm btn-primary" href="{{ path('app_user_admin_edit', {id: user.id}) }}">Modifier</a>
+          {{ include('user_admin/_delete_form.html.twig', { user: user }) }}
+        </td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="5" class="text-center">Aucun utilisateur</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

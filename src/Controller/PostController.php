@@ -204,3 +204,4 @@ public function delete(Request $request, Post $post, EntityManagerInterface $ent
     ], Response::HTTP_BAD_REQUEST);
 }
 
+}
