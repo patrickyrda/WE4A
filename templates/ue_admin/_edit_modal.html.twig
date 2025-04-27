@@ -1,6 +1,20 @@
-{{ form_start(form) }}
+{% extends 'base.html.twig' %}
+{% block title %}Modifier UE{% endblock %}
+
+{% block body %}
+  <h1>Modifier l’UE {{ ue.title }}</h1>
+
+  {# Affichage de l’image actuelle #}
+  {% if ue.imagePath %}
+    <img src="{{ ue.imagePath }}" alt="{{ ue.title }}" class="img-thumbnail mb-3" style="max-height:150px">
+  {% endif %}
+
+  {{ form_start(form) }}
     {{ form_row(form.code) }}
     {{ form_row(form.title) }}
-    {{ form_row(form.imagePath) }}
-    <button class="btn btn-primary">Mettre à jour l'UE</button>
-{{ form_end(form) }}
+    {{ form_row(form.imageFile) }}
+    <button class="btn btn-primary">Enregistrer</button>
+  {{ form_end(form) }}
+
+  <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary mt-3">← Retour à la liste</a>
+{% endblock %}

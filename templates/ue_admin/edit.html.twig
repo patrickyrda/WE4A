@@ -6,8 +6,8 @@
       form: form,
       button_label: 'Mettre à jour'
   }) }}
-  <a class="btn btn-secondary mt-3" href="{{ path('app_ue_admin_index') }}">
-    ← Retour à la liste
+  <a class="btn btn-secondary mt-3" href="{{ path('app_admin_dashboard') }}">
+    Annuler
   </a>
-  {{ include('ue_admin/_delete_form.html.twig', {ue: ue}) }}
+  {{ include('ue_admin/_delete_form.html.twig', {ue: u_e}) }}
 {% endblock %}

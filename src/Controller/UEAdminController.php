@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class UEAdminController extends AbstractController{
     #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
-    public function index(UERepository $repo, Request $request): Response
+    public function index(UERepository $ueRepository, Request $request): Response
     {
         /*$ues = $uERepository->createQueryBuilder('u')
             ->select('u.id, u.code, u.title, u.image_path')
@@ -33,7 +33,7 @@ final class UEAdminController extends AbstractController{
             'u_es' => $uERepository->findAll(),
         ]);*/
 
-        $ues = $repo->findAll();
+        $ues = $ueRepository->findAll();
 
         if ($request->isXmlHttpRequest()) {
             // rendu du partial uniquement
@@ -60,17 +60,18 @@ final class UEAdminController extends AbstractController{
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($uE);
             $entityManager->flush();
+            
              //TODO: Answer to Ajax request, when receiving succes you need to reload the window
-            //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
             return $this->json([
                 'success' => true,
                 'message' => 'UE created successfully']);
         }
 
-        /*return $this->render('ue_admin/new.html.twig', [
+        return $this->render('ue_admin/new.html.twig', [
             'u_e' => $uE,
             'form' => $form,
-        ]);*/
+        ]);
         return $this->json([
             'form' => $this->renderView('ue_admin/_form.html.twig', [
                 'u_e' => $uE,
@@ -88,29 +89,22 @@ final class UEAdminController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_u_e_admin_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, UE $uE, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, UE $uE, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(UEType::class, $uE);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
-            return $this->json([
-                'success' => true,
-                'message' => 'UE updated successfully']);
+            $em->flush();
+            return $this->redirectToRoute('app_admin_dashboard');
         }
-
-        /*return $this->render('ue_admin/edit.html.twig', [
+        return $this->render('ue_admin/edit.html.twig', [
             'u_e' => $uE,
-            'form' => $form,
-        ]);*/
-        return $this->json([
-            'form' => $this->renderView('ue_admin/_form.html.twig', [
-                'u_e' => $uE,
-                'form' => $form->createView()
-            ])
+            'form' => $form->createView(),
+        ]);
+        return $this->render('ue_admin/edit.html.twig', [
+            'ue'   => $ue,
+            'form' => $form->createView(),
         ]);
     }
     /*
@@ -125,10 +119,6 @@ final class UEAdminController extends AbstractController{
             $entityManager->flush();
         }
 
-        return $this->json([
-            'success' => true,
-            'message' => 'UE deleted successfully'  
-        ]);
-        //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_admin_dashboard', []);
     }
 }

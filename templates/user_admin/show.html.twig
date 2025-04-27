@@ -1,42 +1,17 @@
+{# templates/user_admin/show.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}User{% endblock %}
+{% block title %}Détails de l’étudiant{% endblock %}
 
 {% block body %}
-    <h1>User</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Roles</th>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ user.password }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ user.name }}</td>
-            </tr>
-            <tr>
-                <th>Surname</th>
-                <td>{{ user.surname }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_user_admin_index') }}">back to list</a>
-
-    <a href="{{ path('app_user_admin_edit', {'id': user.id}) }}">edit</a>
-
-    
+  <h1>Détails de l’étudiant</h1>
+  <table class="table">
+    <tr><th>Email</th>    <td>{{ user.email }}</td></tr>
+    <tr><th>Nom</th>      <td>{{ user.name }}</td></tr>
+    <tr><th>Prénom</th>   <td>{{ user.surname }}</td></tr>
+    <tr><th>Roles</th>    <td>{{ user.roles|join(', ') }}</td></tr>
+  </table>
+  <a href="{{ path('app_user_admin_index') }}" class="btn btn-secondary">
+    ← Retour à la liste
+  </a>
 {% endblock %}

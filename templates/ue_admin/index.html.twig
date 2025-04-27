@@ -2,12 +2,8 @@
 {% block title %}Administration des UE{% endblock %}
 
 {% block body %}
-  <div data-controller="admin-dashboard">
-    <h1 class="mb-4">Gestion des UE</h1>
-    <a class="btn btn-success mb-3" href="{{ path('app_ue_admin_new') }}">+ Nouvelle UE</a>
-    <div data-admin-dashboard-target="container">
-      {% include 'ue_admin/_table.html.twig' with {ues: ues} %}
-    </div>
+  <div id="ue-table-container">
+    {{ include('ue_admin/_table.html.twig', {ues: u_es}) }}
   </div>
 {% endblock %}
 

@@ -5,12 +5,18 @@ export default class extends Controller {
   static targets = ['ueContainer', 'userContainer', 'modal', 'modalContent'];
 
   connect() {
-    console.log('Stimulus Admin Dashboard chargé');
+    this.loadUeTable()
   }
 
-  loadUeTable(event) {
-    event.preventDefault();
-    this._fetchAndInject('/ue/admin', 'ueContainer');
+  loadUeTable() {
+    fetch('/ue/admin', { headers: {'X-Requested-With':'XMLHttpRequest'} })
+      .then(r => r.json())
+      .then(json => {
+        if (json.success) {
+          document.getElementById('ue-table-container').innerHTML = json.html
+        }
+      })
+      .catch(e => console.error('Erreur AJAX', e))
   }
 
   loadUserTable(event) {

@@ -4,7 +4,7 @@
 
 {% block body %}
   <div data-controller="admin-dashboard">
-    <h1>Administration</h1>
+    <h1>Admin page</h1>
 
     <div class="mb-4">
       <button
@@ -20,7 +20,7 @@
         class="btn btn-secondary"
         data-action="click->admin-dashboard#loadUserTable"
       >
-        Gérer les utilisateurs
+        Gérer les étudiants
       </button>
     </div>
 
@@ -53,7 +53,6 @@
       }
 
       _fetchAndInject(url, containerId) {
-        // vide l'autre container pour simplicité
         if (containerId === 'ue-table-container') {
           document.getElementById('user-table-container').innerHTML = '';
         } else {

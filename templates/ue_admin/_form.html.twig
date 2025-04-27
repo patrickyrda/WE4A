@@ -10,10 +10,10 @@
     {{ form_errors(form.title) }}
   </div>
   <div class="mb-3">
-    {{ form_label(form.imagePath) }}
-    {{ form_widget(form.imagePath, {'attr': {'class': 'form-control'}}) }}
-    {{ form_help(form.imagePath) }}
-    {{ form_errors(form.imagePath) }}
+    {{ form_label(form.image_path) }}
+    {{ form_widget(form.image_path, {'attr': {'class': 'form-control'}}) }}
+    {{ form_help(form.image_path) }}
+    {{ form_errors(form.image_path) }}
   </div>
   <button class="btn btn-success">
     {{ button_label|default('Enregistrer') }}
