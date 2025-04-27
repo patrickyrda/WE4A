@@ -33,8 +33,15 @@ final class UserAdminController extends AbstractController{
 
         return JsonResponse::fromJsonString($data);*/
 
-        return $this->render('user_admin/index.html.twig', [   //THIS ONE IS EQUALY FUNCTIONAL
+        /*return $this->render('user_admin/index.html.twig', [   //THIS ONE IS EQUALY FUNCTIONAL
             'users' => $userRepository->findAll(),
+        ]);*/
+        $html = $this->renderView('user_admin/index.html.twig', [
+            'users' => $userRepository->findAll(),
+        ]);
+        return $this->json([
+            'success' => true,
+            'html' => $html,
         ]);
     }
     //HERE HAVE TO FIX TO ADD THE HASHED PASSWORD!
@@ -87,8 +94,12 @@ final class UserAdminController extends AbstractController{
 
         if ($form->isSubmitted() && $form->isValid()) {
             
+            //TODO: Here have to check if a password was inserted, if not, don't change it, HAVE TO CHANGE THE FORM
             $plainPassword = $form->get('plainPassword')->getData();
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            if ($plainPassword) {
+                $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            }
+           
             $entityManager->flush();
 
             //return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);
@@ -98,16 +109,16 @@ final class UserAdminController extends AbstractController{
             ]);
         }
 
-        return $this->render('user_admin/edit.html.twig', [
+        /*return $this->render('user_admin/edit.html.twig', [
             'user' => $user,
             'form' => $form,
-        ]);
-        /*return $this->json([
+        ]);*/
+        return $this->json([
             'form' => $this->renderView('user_admin/_form.html.twig', [
                 'user' => $user,
                 'form' => $form->createView(),
                 ])
-            ]);*/
+            ]);
     }
 
     /*

@@ -30,8 +30,16 @@ final class UEAdminController extends AbstractController{
         $data = $serializer->serialize($content, 'json'); 
 
         return JsonResponse::fromJsonString($data);*/
-        return $this->render('ue_admin/index.html.twig', [
+        /*return $this->render('ue_admin/index.html.twig', [
             'u_es' => $uERepository->findAll(),
+        ]);*/
+
+        $html = $this->renderView('ue_admin/index.html.twig', [
+            'u_es' => $uERepository->findAll(),
+        ]);
+        return $this->json([
+            'success' => true,
+            'html' => $html,
         ]);
     }
 

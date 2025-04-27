@@ -170,6 +170,27 @@ final class UEDashboardController extends AbstractController{
         return $jsonResponse->success($newposts, 'Fetched most recent posts successfully');
     }
 
+    #[Route('/user/api/get_participants', name: 'user_api_get_participants')]
+    public function getParticipants(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse, Request $request) : Response 
+    {   
+        $ue_id = $request->query->get('ue_id');
+        if (!$ue_id) {
+            return $jsonResponse->error("UE id not provided");
+        }
+
+        $conn = $entityManager->getConnection();
+        $query = 'SELECT u.name, u.surname, u.email FROM user u INNER JOIN inscriptions i ON u.id = i.user_id_id WHERE i.ue_id_id = :ue_id;';
+        $stmt = $conn->prepare($query);
+        $result = $stmt->executeQuery(['ue_id' => $ue_id]);
+        $participants = $result->fetchAllAssociative();
+
+        if (!$participants) {
+            return $jsonResponse->success([], 'UE does not have participants yet');
+        }
+
+        return $jsonResponse->success($participants, 'Fetched participants successfully');
     }
+
+}
 
 
