@@ -104,7 +104,7 @@ public function show(User $user, Request $request): Response
             'form' => $form,
         ]);*/
         return $this->json([
-            'form' => $this->renderView('user_admin/_form.html.twig', [
+            'form' => $this->renderView('user_admin/_edit_modal.html.twig', [
                 'user' => $user,
                 'form' => $form->createView(),
                 ])
