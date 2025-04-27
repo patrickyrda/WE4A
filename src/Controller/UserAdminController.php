@@ -61,12 +61,20 @@ final class UserAdminController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_user_admin_show', methods: ['GET'])]
-    public function show(User $user): Response
-    {
-        return $this->render('user_admin/show.html.twig', [
-            'user' => $user,
+public function show(User $user, Request $request): Response
+{
+    if ($request->isXmlHttpRequest()) {
+        return $this->json([
+            'content' => $this->renderView('user_admin/show.html.twig', [
+                'user' => $user,
+            ])
         ]);
     }
+
+    return $this->render('user_admin/show.html.twig', [
+        'user' => $user,
+    ]);
+}
 
     #[Route('/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
