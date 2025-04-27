@@ -1,38 +1,98 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Post index{% endblock %}
+{% block title %}Gestion des Posts{% endblock %}
 
 {% block body %}
-    <h1>Post index</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">Gestion des Posts</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Message</th>
-                <th>Date</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    {# Bouton pour ouvrir le modal "Créer un post" #}
+    <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#newPostModal">
+        Nouveau Post
+    </button>
+
+    {# Liste des posts existants #}
+    <div class="list-group">
         {% for post in posts %}
-            <tr>
-                <td>{{ post.id }}</td>
-                <td>{{ post.message }}</td>
-                <td>{{ post.date ? post.date|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
-                    <a href="{{ path('post_edit', {'id': post.id}) }}">Edit classique</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Post n°{{ post.id }}</strong><br>
+                    UV : {{ post.ue.code }} - {{ post.ue.titre }}
+                </div>
+                <div>
+                    <a href="{{ path('app_post_show', {id: post.id}) }}" class="btn btn-info btn-sm">Voir</a>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal{{ post.id }}">
+                        Modifier
+                    </button>
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+
+            {# Modal Modifier #}
+            <div class="modal fade" id="editPostModal{{ post.id }}" tabindex="-1" aria-labelledby="editPostModalLabel{{ post.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{{ path('app_post_edit', {id: post.id}) }}" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editPostModalLabel{{ post.id }}">Modifier Post</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                {{ include('post/_form.html.twig', { form: form(post) }) }}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {# Modal Supprimer #}
+            <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{{ path('app_post_delete', {id: post.id}) }}" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deletePostModalLabel{{ post.id }}">Supprimer Post</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                Êtes-vous sûr de vouloir supprimer ce post ?
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ post.id) }}">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         {% endfor %}
-        </tbody>
-    </table>
+    </div>
 
-    <a href="{{ path('app_post_new') }}">Create new</a>
+    {# Modal Nouveau Post #}
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ path('app_post_new') }}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="newPostModalLabel">Créer un Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{ include('post/_form.html.twig', { form: form(post) }) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
+</div>
 {% endblock %}
