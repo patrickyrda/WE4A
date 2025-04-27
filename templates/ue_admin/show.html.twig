@@ -1,34 +1,28 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}UE{% endblock %}
-
+{% block title %}Détails UE{% endblock %}
 {% block body %}
-    <h1>UE</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ u_e.id }}</td>
-            </tr>
-            <tr>
-                <th>Code</th>
-                <td>{{ u_e.code }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ u_e.title }}</td>
-            </tr>
-            <tr>
-                <th>Image_path</th>
-                <td>{{ u_e.imagePath }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_u_e_admin_index') }}">back to list</a>
-
-    <a href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">edit</a>
-
-    
+  <h1>Détails de l’UE</h1>
+  <table class="table">
+    <tr>
+      <th>Code</th>
+      <td>{{ ue.code }}</td>
+    </tr>
+    <tr>
+      <th>Titre</th>
+      <td>{{ ue.title }}</td>
+    </tr>
+    {% if ue.imagePath %}
+      <tr>
+        <th>Image</th>
+        <td><img src="{{ ue.imagePath }}" alt="" style="max-height:100px"></td>
+      </tr>
+    {% endif %}
+  </table>
+  <a class="btn btn-primary" href="{{ path('app_ue_admin_edit', {'id': ue.id}) }}">
+    Modifier
+  </a>
+  {{ include('ue_admin/_delete_form.html.twig', {ue: ue}) }}
+  <a class="btn btn-secondary" href="{{ path('app_ue_admin_index') }}">
+    ← Retour à la liste
+  </a>
 {% endblock %}

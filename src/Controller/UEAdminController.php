@@ -13,10 +13,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-#[Route('/ue/admin')]
 final class UEAdminController extends AbstractController{
-    #[Route(name: 'app_u_e_admin_index', methods: ['GET'])]
-    public function index(UERepository $uERepository, SerializerInterface $serializer, Request $request): Response
+    #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
+    public function index(UERepository $repo, Request $request): Response
     {
         /*$ues = $uERepository->createQueryBuilder('u')
             ->select('u.id, u.code, u.title, u.image_path')
@@ -34,15 +33,23 @@ final class UEAdminController extends AbstractController{
             'u_es' => $uERepository->findAll(),
         ]);*/
 
-        $html = $this->renderView('ue_admin/index.html.twig', [
-            'u_es' => $uERepository->findAll(),
-        ]);
-        return $this->json([
-            'success' => true,
-            'html' => $html,
+        $ues = $repo->findAll();
+
+        if ($request->isXmlHttpRequest()) {
+            // rendu du partial uniquement
+            $html = $this->renderView('ue_admin/_table.html.twig', [
+                'u_es' => $ues,
+            ]);
+
+            return $this->json([
+                'success' => true,
+                'html'    => $html,
+            ]);
+        }
+        return $this->render('ue_admin/index.html.twig', [
+            'u_es' => $ues,
         ]);
     }
-
     #[Route('/new', name: 'app_u_e_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {

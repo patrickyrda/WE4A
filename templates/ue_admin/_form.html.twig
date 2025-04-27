@@ -1,4 +1,21 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+  <div class="mb-3">
+    {{ form_label(form.code) }}
+    {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.code) }}
+  </div>
+  <div class="mb-3">
+    {{ form_label(form.title) }}
+    {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.title) }}
+  </div>
+  <div class="mb-3">
+    {{ form_label(form.imagePath) }}
+    {{ form_widget(form.imagePath, {'attr': {'class': 'form-control'}}) }}
+    {{ form_help(form.imagePath) }}
+    {{ form_errors(form.imagePath) }}
+  </div>
+  <button class="btn btn-success">
+    {{ button_label|default('Enregistrer') }}
+  </button>
 {{ form_end(form) }}

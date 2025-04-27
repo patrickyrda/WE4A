@@ -190,7 +190,30 @@ final class UEDashboardController extends AbstractController{
 
         return $jsonResponse->success($participants, 'Fetched participants successfully');
     }
+    #[Route('/user/api/ue_participants', name: 'app_user_api_ue_participants', methods: ['GET'])]
+    public function fetchParticipants(Request $request, UERepository $ueRepository): JsonResponse
+    {
+        $ueId = $request->query->getInt('ue_id');
+        if (!$ueId) {
+            return $this->json(['error' => 'ue_id manquant'], 400);
+        }
 
+        $ue = $ueRepository->find($ueId);
+        if (!$ue) {
+            return $this->json(['error' => 'UE introuvable'], 404);
+        }
+
+        $data = [];
+        foreach ($ue->getInscriptions() as $inscription) {
+            $user = $inscription->getUserId();
+            $data[] = [
+                'id'      => $user->getId(),
+                'name'    => $user->getName(),
+                'surname' => $user->getSurname(),
+                'roles'   => $user->getRoles(),
+            ];
+        }
+
+        return $this->json($data);
+    }
 }
-
-

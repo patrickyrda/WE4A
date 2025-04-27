@@ -1,0 +1,34 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Titre</th>
+      <th>Image</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ue in u_es %}
+      <tr>
+        <td>{{ ue.code }}</td>
+        <td>{{ ue.title }}</td>
+        <td>
+          {% if ue.imagePath %}
+            <img src="{{ ue.imagePath }}" alt="{{ ue.title }}" style="height:40px">
+          {% endif %}
+        </td>
+        <td>
+          <a class="btn btn-sm btn-info"  href="{{ path('app_u_e_admin_show', {'id': ue.id}) }}">Voir</a>
+          <a class="btn btn-sm btn-primary" href="{{ path('app_u_e_admin_edit', {'id': ue.id}) }}">Modifier</a>
+          <form method="post"
+                action="{{ path('app_u_e_admin_delete', {'id': ue.id}) }}"
+                style="display:inline"
+                onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette UE ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ue.id) }}">
+            <button class="btn btn-sm btn-danger">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

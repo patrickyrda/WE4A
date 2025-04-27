@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ ue.title }}{% endblock %}
+
+{% block body %}
+<div class="container my-5" data-controller="ue-view">
+  <a href="{{ path('app_user_dashboard') }}" class="btn btn-secondary mb-4">← Retour à Mes UE</a>
+  <h1 class="mb-3">{{ ue.title }}</h1>
+  <p class="text-muted">{{ ue.code }}</p>
+
+  <h3>Participants</h3>
+  <ul class="list-group mb-4" data-ue-view-target="list"></ul>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="module-shim">
+import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js'
+const application = Application.start()
+
+class UeViewController extends Controller {
+  static targets = ['list']
+
+  connect() {
+    this.ueId = '{{ ue.id }}'
+    this.loadParticipants()
+  }
+
+  loadParticipants() {
+    fetch(`/user/api/ue_participants?ue_id=${this.ueId}`)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then(data => {
+        this.listTarget.innerHTML = ''
+        if (data.length === 0) {
+          this.listTarget.innerHTML = '<li class="list-group-item">Aucun participant</li>'
+          return
+        }
+        data.forEach(u => {
+          const li = document.createElement('li')
+          li.classList.add('list-group-item')
+          li.textContent = `${u.name} ${u.surname}`
+          this.listTarget.appendChild(li)
+        })
+      })
+      .catch(e => {
+        console.error('Erreur API UE participants :', e)
+        this.listTarget.innerHTML = '<li class="list-group-item text-danger">Erreur de chargement</li>'
+      })
+  }
+}
+
+application.register('ue-view', UeViewController)
+  </script>
+{% endblock %}

@@ -17,32 +17,14 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[Route('/user/admin')]
 final class UserAdminController extends AbstractController{
     #[Route(name: 'app_user_admin_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository, SerializerInterface $serializer, Request $request): Response
+    public function index(UserRepository $userRepository): Response
     {   
-        //here have to finish the request part plus pagination
-        /*$users = $userRepository->createQueryBuilder('u')
-            ->select('u.id, u.name, u.surname, u.email, u.roles')
-            ->getQuery()
-            ->getResult();
-                
-        $content = [                                    !!!!ONLY IMPLEMENT THAT IF WE WANT PAGINATION, BUT IT MIGHT NOT BE THE CASE
-            'data' => $users
-        ];
-
-        $data = $serializer->serialize($content, 'json'); 
-
-        return JsonResponse::fromJsonString($data);*/
-
-        /*return $this->render('user_admin/index.html.twig', [   //THIS ONE IS EQUALY FUNCTIONAL
-            'users' => $userRepository->findAll(),
-        ]);*/
         $html = $this->renderView('user_admin/index.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
-        return $this->json([
-            'success' => true,
-            'html' => $html,
-        ]);
+
+        // Return plain HTML instead of JSON
+        return new Response($html);
     }
     //HERE HAVE TO FIX TO ADD THE HASHED PASSWORD!
     #[Route('/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]

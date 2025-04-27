@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Edit UE{% endblock %}
-
+{% block title %}Modifier UE{% endblock %}
 {% block body %}
-    <h1>Edit UE</h1>
-
-    {{ include('ue_admin/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_u_e_admin_index') }}">back to list</a>
-
-    {{ include('ue_admin/_delete_form.html.twig') }}
+  <h1>Modifier l’UE</h1>
+  {{ include('ue_admin/_form.html.twig', {
+      form: form,
+      button_label: 'Mettre à jour'
+  }) }}
+  <a class="btn btn-secondary mt-3" href="{{ path('app_ue_admin_index') }}">
+    ← Retour à la liste
+  </a>
+  {{ include('ue_admin/_delete_form.html.twig', {ue: ue}) }}
 {% endblock %}
