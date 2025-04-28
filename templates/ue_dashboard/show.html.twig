@@ -1,23 +1,20 @@
 {% extends 'base.html.twig' %}
-{% block title %}Détails UE{% endblock %}
+{% block title %}{{ u_e.code }} – {{ u_e.title }}{% endblock %}
 
 {% block body %}
 <div class="container my-5">
-  <h1>Détails de l’UE</h1>
+   <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+      {{ u_e.code }} – {{ u_e.title }}
+    </h1>
 
-  <table class="table mb-4">
-    <tr><th>Code</th><td>{{ u_e.code }}</td></tr>
-    <tr><th>Titre</th><td>{{ u_e.title }}</td></tr>
-    {% if u_e.imagePath %}
-      <tr>
-        <th>Image</th>
-        <td>
-          <img src="{{ u_e.imagePath }}" style="max-height:100px" alt="{{ u_e.title }}">
-        </td>
-      </tr>
+    {% if is_granted('ROLE_TEACHER') %}
+      <a class="btn btn-primary"
+         href="{{ path('app_post_new', { ue_id: u_e.id }) }}">
+        Créer un nouveau post
+      </a>
     {% endif %}
-  </table>
-
+  </div>
   <button
     class="btn btn-info mb-3"
     type="button"
@@ -28,7 +25,6 @@
   >
     Afficher les participants
   </button>
-
   <div class="collapse" id="participants">
     <table class="table table-striped">
       <thead>
@@ -52,8 +48,21 @@
     </table>
   </div>
 
-  <a class="btn btn-secondary" href="{{ path('app_user_dashboard') }}">
-    ← Retour à la liste
-  </a>
+  <section class="mt-5">
+    <a class="btn btn-secondary mt-4"
+     href="{{ path('app_user_dashboard') }}">
+    ← Retour au tableau de bord
+    </a>
+    <h2 class="h5 mb-3">Tous les posts</h2>
+    <div class="d-flex flex-column gap-3"
+         data-controller="post"
+         data-post-target="list">
+      {% for post in posts %}
+        {% include 'post/item.html.twig' with { post: post } only %}
+      {% else %}
+        <p class="text-muted">Aucun post pour l’instant.</p>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 {% endblock %}

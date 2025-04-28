@@ -79,17 +79,17 @@ final class PostController extends AbstractController{
             $entityManager->persist($post);
             $entityManager->flush();
 
-            //return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_u_e_dashboard_show', ['id' => $ue->getId()]);
             return $this->json([
                 'success' => true,
                 'message' => 'Post created successfully'
             ]);
         }
 
-        /*return $this->render('post/new.html.twig', [
+        return $this->render('post/new.html.twig', [
             'post' => $post,
             'form' => $form,
-        ]);*/
+        ]);
         return $this->json([
             'form' => $this->renderView('post/_form.html.twig', [
                 'post' => $post,
@@ -106,68 +106,57 @@ final class PostController extends AbstractController{
         ]);
     }
 
-    //add logic to modify the file
     #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
-    {
+    public function edit(
+        Request                $request,
+        Post                   $post,
+        EntityManagerInterface $em,
+        UERepository           $ueRepository,
+        SluggerInterface       $slugger
+    ): Response {
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
-            
+            $newMessage  = $form->get('message')->getData();
             $uploadedFile = $form->get('file_path')->getData();
-
             if ($uploadedFile) {
-                foreach ($post->getFiles() as $existingFile) {    
-                    $oldFilePath = $this->getParameter('uploads_directory').'/'.$existingFile->getFilePath();
-
-                    if (file_exists($oldFilePath)) {
-                        unlink($oldFilePath);
-                    }
-
-                    $post->removeFile($existingFile);
-                    $entityManager->remove($existingFile);
+                foreach ($post->getFiles() as $old) {
+                    $em->remove($old);
                 }
-
-                $filename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($filename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
-
+                $post->setMessage(null);
+                $origName    = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeName    = $slugger->slug($origName);
+                $newFilename = sprintf('%s-%s.%s',
+                    $safeName,
+                    uniqid(),
+                    $uploadedFile->guessExtension()
+                );
+                $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads';
                 try {
-                    $uploadedFile->move(
-                        $this->getParameter('uploads_directory'),
-                        $newFilename
-                    );
+                    $uploadedFile->move($uploadDir, $newFilename);
                 } catch (FileException $e) {
-                    // Handle upload exception if needed
+                    $this->addFlash('danger', 'Échec de l’upload du fichier.');
                 }
-
-                $file = new File();
-                $file->setFilePath($newFilename);
-
-                $post->addFile($file);
-                $entityManager->persist($file);
+                $fileEntity = new File();
+                $fileEntity->setFilePath($newFilename);
+                $post->addFile($fileEntity);
+                $em->persist($fileEntity);
             }
-
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
-            return $this->json([
-                'success' => true,
-                'message' => 'Post updated successfully'
+            elseif ($newMessage !== null && trim($newMessage) !== '') {
+                foreach ($post->getFiles() as $old) {
+                    $em->remove($old);
+                }
+            }
+            $em->flush();
+            $this->addFlash('success', 'Post mis à jour avec succès.');
+            return $this->redirectToRoute('app_u_e_dashboard_show', [
+                'id' => $post->getUeId()->getId(),
             ]);
         }
-
-        /*return $this->render('post/edit.html.twig', [
+        return $this->render('post/edit.html.twig', [
             'post' => $post,
-            'form' => $form,
-        ]);*/
-
-        return $this->json([
-            'form' => $this->renderView('post/_form.html.twig', [
-                'post' => $post,
-                'form' => $form->createView(),
-            ])
+            'form' => $form->createView(),
         ]);
     }
 /*
@@ -183,12 +172,11 @@ final class PostController extends AbstractController{
     }
 }
 */
-    
-# Pour eviter les bugs en AJAX  
 #[Route('/post/{id}', name: 'app_post_delete', methods: ['POST'])]
 public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
 {
-    if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->getPayload()->getString('_token'))) {
+    $token = $request->request->get('_token');
+    if ($this->isCsrfTokenValid('delete' . $post->getId(), $token)) {
         $entityManager->remove($post);
         $entityManager->flush();
 

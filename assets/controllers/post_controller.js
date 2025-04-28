@@ -2,14 +2,14 @@ import { Controller } from "@hotwired/stimulus";
 import { Modal } from "bootstrap";
 
 export default class extends Controller {
+  static targets = ['list'];
+  static values  = { postId: Number, csrf: String };
   connect() {
-    console.log("Stimulus chargé pour Post !");
     this.setupLinks();
     this.setupDeleteForms();
   }
 
   setupLinks() {
-    // Capter les clics sur "new" et "edit" seulement
     document.querySelectorAll('a[href]').forEach(link => {
       if (link.href.includes('/post/new')) {
         link.addEventListener('click', (e) => this.handleNewClick(e));
@@ -21,7 +21,7 @@ export default class extends Controller {
 
   setupDeleteForms() {
     document.querySelectorAll('form[action]').forEach(form => {
-      if (form.action.match(/\/post\/\d+$/)) { // Attention ici: delete form
+      if (form.action.match(/\/post\/\d+$/)) {
         form.addEventListener('submit', (e) => this.handleDeleteSubmit(e));
       }
     });
@@ -125,5 +125,27 @@ export default class extends Controller {
         alert("Erreur réseau");
       });
     });
+  }
+  askDelete(event) {
+    const id   = event.currentTarget.dataset.postIdValue;
+    const csrf = event.currentTarget.dataset.csrfValue;
+
+    if (!confirm('Confirmer la suppression de ce post ?')) return;
+    const body = new FormData();
+    body.append('_token', csrf);
+    fetch(`/post/${id}`, {
+      method : 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body
+    })
+      .then(r => r.json())
+      .then(json => {
+        if (json.success) {
+          document.getElementById(`post-${id}`).remove();
+        } else {
+          alert(json.message || 'Erreur inconnue');
+        }
+      })
+      .catch(() => alert('Erreur'));
   }
 }

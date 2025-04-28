@@ -6,16 +6,11 @@
   <h1>Bienvenue sur votre tableau de bord</h1>
   <section class="recent-posts mt-5">
     <h2 class="h4 mb-3">Articles récents</h2>
-    <div class="row">
-      {% for post in recent_posts %}
-        <div class="col-md-4 mb-4">
-          {% include 'post/recent.html.twig' with { post: post } only %}
-        </div>
-      {% else %}
-        <div class="col-12">
-          <p class="text-muted">Aucun article récent.</p>
-        </div>
-      {% endfor %}
+    <div id="posts-wrapper"
+      data-controller="pagination"
+      data-pagination-target="wrapper"
+      data-action="click->pagination#changePage">
+    {% include 'ue_dashboard/_posts.html.twig' %}
     </div>
   </section>
 

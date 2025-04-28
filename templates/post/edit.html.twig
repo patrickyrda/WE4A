@@ -1,13 +1,98 @@
+{# templates/post/edit.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Post{% endblock %}
+{% block title %}Modifier un post{% endblock %}
 
 {% block body %}
-    <h1>Edit Post</h1>
+<div class="container py-4">
+  <h1 class="h4 mb-4">Modifier le post</h1>
 
-    {{ include('post/_form.html.twig', {'button_label': 'Update'}) }}
+  {# Onglets Bootstrap #}
+  <div class="btn-group mb-4" role="group" aria-label="Type de post">
+    <button id="tab-text" type="button" class="btn btn-primary">Texte</button>
+    <button id="tab-file" type="button" class="btn btn-outline-primary">Fichier</button>
+  </div>
 
-    <a href="{{ path('app_post_index') }}">back to list</a>
+  {# Formulaire d’édition #}
+  {{ form_start(form, { action: path('app_post_edit', { id: post.id }) }) }}
 
-    {{ include('post/_delete_form.html.twig') }}
+    {# Section texte #}
+    <div id="sect-text">
+      {{ form_row(form.message, {
+          attr: {
+            class: 'form-control auto-resize',
+            rows: 3,
+            style: 'overflow:hidden; resize:none;'
+          }
+      }) }}
+    </div>
+
+    {# Section fichier, avec liste des fichiers existants #}
+    <div id="sect-file" class="d-none">
+      {% if post.files|length > 0 %}
+        <ul class="mb-3">
+          {% for file in post.files %}
+            <li>
+              <a href="{{ asset('uploads/' ~ file.filePath) }}" target="_blank">
+                {{ file.filePath }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {{ form_row(form.file_path) }}
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      Mettre à jour
+    </button>
+
+  {{ form_end(form) }}
+
+  <p class="mt-3">
+    <a href="{{ path('app_u_e_dashboard_show', { id: post.ueId.id }) }}"
+       class="btn btn-outline-primary">
+      <i class="bi bi-arrow-left"></i>&nbsp;Retour
+    </a>
+  </p>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tBtn      = document.getElementById('tab-text'),
+            fBtn      = document.getElementById('tab-file'),
+            tDiv      = document.getElementById('sect-text'),
+            fDiv      = document.getElementById('sect-file'),
+            textarea  = document.querySelector('.auto-resize'),
+            // si au moins un fichier est déjà attaché, on ouvre l’onglet 'file'
+            initial   = {{ post.files|length > 0 ? "'file'" : "'text'" }};
+
+      function toggle(type) {
+        const isText = type === 'text';
+        tDiv.classList.toggle('d-none', !isText);
+        fDiv.classList.toggle('d-none',  isText);
+
+        tBtn.classList.toggle('btn-primary',         isText);
+        tBtn.classList.toggle('btn-outline-primary', !isText);
+        fBtn.classList.toggle('btn-primary',         !isText);
+        fBtn.classList.toggle('btn-outline-primary',  isText);
+      }
+
+      function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+      }
+
+      tBtn.addEventListener('click', () => toggle('text'));
+      fBtn.addEventListener('click', () => toggle('file'));
+      textarea && textarea.addEventListener('input', () => autoResize(textarea));
+
+      // initialisation
+      toggle(initial);
+      textarea && autoResize(textarea);
+    });
+  </script>
 {% endblock %}

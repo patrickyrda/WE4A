@@ -1,17 +1,22 @@
 {
   "controllers": {
     "@symfony/ux-turbo": {
-      "turbo-core": {
-        "enabled": true,
-        "fetch": "eager"
-      },
-      "mercure-turbo-stream": {
-        "enabled": false,
-        "fetch": "eager"
-      }
-    }
+      "turbo-core":           { "enabled": true,  "fetch": "eager" },
+      "mercure-turbo-stream": { "enabled": false, "fetch": "eager" }
+    },
+
+    "controllers/ue_dashboard_controller": { "enabled": true, "fetch": "eager" },
+    "controllers/admin_dashboard_controller":{ "enabled": true, "fetch": "eager" },
+    "controllers/pagination_controller": { "enabled": true, "fetch": "eager" },
+    "controllers/post_controller": { "enabled": true, "fetch": "eager" },
+    "controllers/post_form_controller":       { "enabled": true, "fetch": "eager" }
   },
+
   "entrypoints": [
-    "controllers/ue_dashboard_controller.js"
+    "controllers/ue_dashboard_controller.js",
+    "controllers/pagination_controller.js",
+    "controllers/post_controller.js",
+    "controllers/post_form_controller.js",
+    "controllers/admin_dashboard_controller.js"
   ]
 }

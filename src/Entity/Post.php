@@ -35,7 +35,7 @@ class Post
      */
     #[ORM\OneToMany(targetEntity: File::class, mappedBy: 'post', orphanRemoval: true)]
     private Collection $files;
-
+    
     public function __construct()
     {
         $this->files = new ArrayCollection();

@@ -1,18 +1,26 @@
-<article class="card h-100 shadow-sm">
+<article class="card shadow-sm">
   <div class="card-body">
-    <h5 class="card-title mb-1">
-      <p class="mb-0">{{ post.message|u.truncate(140) }}</p>
-    </h5>
+    {% set auteur = post.userId %}
+    {% set ue     = post.ueId %}
 
-    <small class="text-muted d-block mb-2">
-      {{ post.date|date('d/m/Y H:i') }}
-    </small>
-
-    {# Mini-extrait si besoin #}
-    {% if post.content is defined %}
-      <p class="card-text mb-0">
-        {{ post.content|striptags|u.truncate(140) }}
+    {% if post.files|length > 0 %}
+      {% set fichier    = post.files|first %}
+      {% set nomFichier = fichier.filePath|split('/')|last %}
+      <p class="mb-1">
+        <strong>{{ auteur.name }} {{ auteur.surname }}</strong>
+        a posté un nouveau fichier,
+        <strong>{{ nomFichier }}</strong>,
+        dans <strong>{{ ue.title }}</strong>.
+      </p>
+    {% else %}
+      <p class="mb-1">
+        <strong>{{ auteur.name }} {{ auteur.surname }}</strong>
+        a posté un nouveau message
+        <strong>{{ post.message|u.truncate(60, '…') }}</strong>
+        dans <strong>{{ ue.title }}</strong>.
       </p>
     {% endif %}
+
+    <small class="text-muted">{{ post.date|date('d/m/Y H:i') }}</small>
   </div>
 </article>

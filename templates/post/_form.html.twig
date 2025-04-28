@@ -1,13 +1,15 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
 
-    <div id="champMessage">
-        {{ form_row(form.message) }}
-    </div>
+  <div id="champMessage">
+    {{ form_row(form.message) }}
+  </div>
 
-    <div id="champFichier">
-        {{ form_row(form.file_path) }}
-    </div>
+  <div id="champFichier">
+    {{ form_row(form.file_path) }}
+  </div>
 
-    <button class="btn">{{ button_label|default('Save') }}</button>
+  <button class="btn btn-primary">
+    {{ button_label|default('Enregistrer') }}
+  </button>
+
 {{ form_end(form) }}

@@ -1,127 +1,129 @@
-import { Controller } from '@hotwired/stimulus';
-import { Modal } from 'bootstrap';
+import { Controller } from '@hotwired/stimulus'
+import { Modal } from 'bootstrap'
 
 export default class extends Controller {
-  static targets = ['ueContainer', 'userContainer', 'modal', 'modalContent'];
-
-  connect() {
-    this.loadUeTable()
+  static targets = ['ueContainer', 'userContainer', 'modal', 'modalContent','btnUe', 'btnStudent'];
+  static values = { active: String };
+  
+  connect () {
+    if (!this.hasActiveValue) this.activeValue = 'ue';
++   this._updateButtons();
+    this._fetchAndInject('/ue/admin', 'ueContainer');
   }
 
-  loadUeTable() {
-    fetch('/ue/admin', { headers: {'X-Requested-With':'XMLHttpRequest'} })
-      .then(r => r.json())
-      .then(json => {
-        if (json.success) {
-          document.getElementById('ue-table-container').innerHTML = json.html
-        }
-      })
-      .catch(e => console.error('Erreur AJAX', e))
+  loadUeTable (event) {
+    if (event) event.preventDefault()
+    this.#fetchAndInject('/ue/admin', 'ueContainer')
   }
 
-  loadUserTable(event) {
-    event.preventDefault();
-    this._fetchAndInject('/user/admin', 'userContainer');
+  loadUserTable (event) {
+    event.preventDefault()
+    this.#fetchAndInject('/user/admin', 'userContainer')
   }
 
-  _fetchAndInject(url, targetName) {
+  #fetchAndInject (url, targetName) {
     if (targetName === 'ueContainer') {
-      this.userContainerTarget.innerHTML = '';
+      this.userContainerTarget.innerHTML = ''
     } else {
-      this.ueContainerTarget.innerHTML = '';
+      this.ueContainerTarget.innerHTML = ''
     }
 
     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(r => {
-        if (!r.ok) throw new Error(`Status ${r.status}`);
-        return r.json();
+        if (!r.ok) throw new Error(`Status ${r.status}`)
+        return r.json()
       })
       .then(json => {
         if (json.success) {
-          this[targetName + 'Target'].innerHTML = json.html;
-          this.bindUserAdminLinks(); // Important si c'est users
+          this[`${targetName}Target`].innerHTML = json.html
+          if (targetName === 'userContainer') {
+            this.#bindUserAdminLinks()
+          }
         }
       })
-      .catch(err => console.error('Erreur AJAX', err));
+      .catch(err => console.error('Erreur AJAX', err))
   }
 
-  bindUserAdminLinks() {
+  #bindUserAdminLinks () {
     document.querySelectorAll('a[href]').forEach(link => {
-      if (link.href.includes('/user/admin/') && link.href.includes('/edit')) {
-        link.addEventListener('click', (e) => this.openEditModal(e));
-      } else if (link.href.includes('/user/admin/') && !link.href.includes('/edit') && !link.href.includes('/new')) {
-        link.addEventListener('click', (e) => this.openShowModal(e));
+      const href = link.getAttribute('href')
+      if (href?.startsWith('/user/admin/') && href.includes('/edit')) {
+        link.addEventListener('click', e => this.openEditModal(e))
+      } else if (href?.startsWith('/user/admin/') && !href.includes('/edit') && !href.includes('/new')) {
+        link.addEventListener('click', e => this.openShowModal(e))
       }
-    });
+    })
   }
 
-  openShowModal(event) {
-    event.preventDefault();
-    const url = event.currentTarget.href;
-    this.fetchModalContent(url, 'content');
+  openShowModal (event) {
+    event.preventDefault()
+    this.#fetchModalContent(event.currentTarget.href, 'content')
   }
 
-  openEditModal(event) {
-    event.preventDefault();
-    const url = event.currentTarget.href;
-    this.fetchModalContent(url, 'form');
+  openEditModal (event) {
+    event.preventDefault()
+    this.#fetchModalContent(event.currentTarget.href, 'form')
   }
 
-  fetchModalContent(url, key) {
+  #fetchModalContent (url, key) {
     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(r => r.json())
       .then(json => {
         if (json[key]) {
-          this.ensureModalExists();
-          this.modalContentTarget.innerHTML = json[key];
-          const modalInstance = new Modal(this.modalTarget);
-          modalInstance.show();
+          this.#ensureModalExists()
+          this.modalContentTarget.innerHTML = json[key]
+          const modal = new Modal(this.modalTarget)
+          modal.show()
 
-          if (key === 'form') {
-            this.bindFormSubmit(modalInstance);
-          }
+          if (key === 'form') this.#bindFormSubmit(modal)
         }
       })
-      .catch(err => console.error('Erreur AJAX', err));
+      .catch(err => console.error('Erreur AJAX', err))
   }
 
-  bindFormSubmit(modalInstance) {
-    const form = this.modalContentTarget.querySelector('form');
-    if (!form) return;
+  #bindFormSubmit (modal) {
+    const form = this.modalContentTarget.querySelector('form')
+    if (!form) return
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+    form.addEventListener('submit', e => {
+      e.preventDefault()
+      const formData = new FormData(form)
 
       fetch(form.action, { method: form.method, body: formData })
         .then(r => r.json())
         .then(json => {
           if (json.success) {
-            modalInstance.hide();
-            window.location.reload();
+            modal.hide()
+            this.loadUserTable(new Event('dummy'))
           } else if (json.form) {
-            this.modalContentTarget.innerHTML = json.form;
-            this.bindFormSubmit(modalInstance);
+            this.modalContentTarget.innerHTML = json.form
+            this.#bindFormSubmit(modal)
           }
         })
-        .catch(err => console.error('Erreur AJAX', err));
-    });
+        .catch(err => console.error('Erreur AJAX', err))
+    })
   }
 
-  ensureModalExists() {
+  #ensureModalExists () {
     if (!this.hasModalTarget) {
-      const modal = document.createElement('div');
-      modal.classList.add('modal', 'fade');
-      modal.id = 'modalAdmin';
-      modal.tabIndex = -1;
+      const modal = document.createElement('div')
+      modal.className = 'modal fade'
+      modal.id = 'modalAdmin'
+      modal.tabIndex = -1
       modal.innerHTML = `
         <div class="modal-dialog">
           <div class="modal-content" data-admin-dashboard-target="modalContent"></div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      this.modalTarget = modal;
-      this.modalContentTarget = modal.querySelector('[data-admin-dashboard-target="modalContent"]');
+        </div>`
+      document.body.appendChild(modal)
+      this.modalTarget = modal
+      this.modalContentTarget = modal.querySelector('[data-admin-dashboard-target="modalContent"]')
     }
   }
+  _updateButtons() {
+    const isUe = this.activeValue === 'ue';
+    this.btnUeTarget.classList.toggle('btn-primary', isUe);
+    this.btnUeTarget.classList.toggle('btn-outline-primary', !isUe);
+    this.btnStudentTarget.classList.toggle('btn-primary', !isUe);
+    this.btnStudentTarget.classList.toggle('btn-outline-primary', isUe);
+    }
 }

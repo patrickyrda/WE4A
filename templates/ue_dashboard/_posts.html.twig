@@ -1,0 +1,27 @@
+<div id="posts-container">
+  <div class="d-flex flex-column gap-3">
+    {% for post in recent_posts %}
+      {% include 'post/recent.html.twig' with { post: post } only %}
+    {% endfor %}
+  </div>
+
+  {% if total_pages > 1 %}
+    <nav id="pagination-nav" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+          <a class="page-link" href="{{ path('app_user_dashboard', { page: current_page-1 }) }}">&laquo;</a>
+        </li>
+
+        {% for p in 1..total_pages %}
+          <li class="page-item {% if p == current_page %}active{% endif %}">
+            <a class="page-link" href="{{ path('app_user_dashboard', { page:p }) }}">{{ p }}</a>
+          </li>
+        {% endfor %}
+
+        <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+          <a class="page-link" href="{{ path('app_user_dashboard', { page: current_page+1 }) }}">&raquo;</a>
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
+</div>

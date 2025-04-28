@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\JsonResponseService;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use App\Entity\UE;
 use App\Entity\User;
@@ -22,22 +23,48 @@ final class UEDashboardController extends AbstractController{
     #[Route('/user/dashboard', name: 'app_user_dashboard')]
     #[IsGranted('ROLE_USER')]
     public function index(
+        Request $request,
         UERepository $ueRepository,
         UserRepository $userRepository,
         PostRepository $postRepo
-    ): Response {
+    ): Response|RedirectResponse {
         $utilisateur = $this->getUser();
-        $recentPosts = $postRepo->findBy([], ['date' => 'DESC'], 5);
+        $limit = 5;
         $inscriptions = $utilisateur->getInscriptions();
-        $ues = $inscriptions->map(fn($i) => $i->getUeId());
+        $ues = $inscriptions
+            ->map(fn($insc) => $insc->getUeId())
+            ->toArray();
+        $totalPosts = $postRepo->count([
+            'ue_id' => $ues
+        ]);
+        $totalPages = max(1, (int) ceil($totalPosts / $limit));
+        $page = $request->query->getInt('page', 1);
+        if ($page < 1) {
+            return $this->redirectToRoute('app_user_dashboard', ['page' => 1]);
+        }
+        if ($page > $totalPages) {
+            return $this->redirectToRoute('app_user_dashboard', ['page' => $totalPages]);
+        }
+        $offset = ($page - 1) * $limit;
+        $recentPosts = $postRepo->findBy(
+            ['ue_id' => $ues],
+            ['date'   => 'DESC'],
+            $limit,
+            $offset
+        );
         $etudiants = array_filter(
             $userRepository->findAll(),
             fn($u) => in_array('ROLE_STUDENT', $u->getRoles())
         );
+        $template = $request->isXmlHttpRequest()
+        ? 'ue_dashboard/_posts.html.twig'
+        : 'ue_dashboard/index.html.twig';
         return $this->render('ue_dashboard/index.html.twig', [
             'ues' => $ues,
             'etudiants' => $etudiants,
             'recent_posts' => $recentPosts,
+            'current_page' => $page,
+            'total_pages' => $totalPages,
         ]);
     }
     /*
@@ -118,8 +145,8 @@ final class UEDashboardController extends AbstractController{
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-            $ueId       = $data['ue_id']      ?? null;
-            $studentId  = $data['student_id'] ?? null;
+            $ueId = $data['ue_id'] ?? null;
+            $studentId = $data['student_id'] ?? null;
         } catch (\JsonException $e) {
             return new JsonResponse(['success'=>false,'message'=>'JSON invalide'], 400);
         }
@@ -128,8 +155,8 @@ final class UEDashboardController extends AbstractController{
             return new JsonResponse(['success'=>false,'message'=>'Paramètres manquants'], 400);
         }
 
-        $ue       = $em->getRepository(UE::class)->find($ueId);
-        $etud     = $em->getRepository(User::class)->find($studentId);
+        $ue = $em->getRepository(UE::class)->find($ueId);
+        $etud = $em->getRepository(User::class)->find($studentId);
         if (!$ue || !$etud) {
             return new JsonResponse(['success'=>false,'message'=>'UE ou étudiant introuvable'], 404);
         }
@@ -161,7 +188,7 @@ final class UEDashboardController extends AbstractController{
 
         $query = 'SELECT u.code ,p.message, p.date FROM post p 
         INNER JOIN ue u ON p.ue_id_id = u.id 
-        INNER JOIN inscriptions i ON  i.ue_id_id = u.id
+        INNER JOIN inscriptions i ON i.ue_id_id = u.id
         WHERE i.user_id_id = :user_id
         ORDER BY p.date DESC LIMIT 15';
 
@@ -210,25 +237,29 @@ final class UEDashboardController extends AbstractController{
         foreach ($ue->getInscriptions() as $inscription) {
             $user = $inscription->getUserId();
             $data[] = [
-                'id'      => $user->getId(),
-                'name'    => $user->getName(),
+                'id' => $user->getId(),
+                'name' => $user->getName(),
                 'surname' => $user->getSurname(),
-                'roles'   => $user->getRoles(),
+                'roles' => $user->getRoles(),
             ];
         }
 
         return $this->json($data);
     }
     #[Route('/ue/show/{id}', name: 'app_u_e_dashboard_show')]
-    public function show(UE $ue, UserRepository $userRepository): Response
+    public function show(UE $ue, UserRepository $userRepository, PostRepository $postRepo): Response
     {
+        $posts = $postRepo->findBy(
+            ['ue_id' => $ue],
+            ['date'  => 'DESC']
+        );
         $etudiants = array_filter(
             $userRepository->findAll(),
-            fn(\App\Entity\User $u) => in_array('ROLE_STUDENT', $u->getRoles(), true)
+            fn(User $u) => in_array('ROLE_STUDENT', $u->getRoles(), true)
         );
-
         return $this->render('ue_dashboard/show.html.twig', [
-            'u_e'       => $ue,
+            'u_e'     => $ue,
+            'posts'   => $posts,
             'etudiants' => $etudiants,
         ]);
     }

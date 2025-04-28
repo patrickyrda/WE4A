@@ -14,17 +14,6 @@ class PostType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('type', ChoiceType::class, [
-                'choices' => [
-                    'Message' => 'message',
-                    'Fichier' => 'fichier',
-                ],
-                'placeholder' => 'Choisissez un type',
-                'required' => true,
-                'attr' => [
-                    'data-action' => 'post#changerType' // important pour Stimulus
-                ],
-            ])
             ->add('message')
             ->add('file_path', SymfonyFileType::class, [
                 'label' => 'Upload File',
