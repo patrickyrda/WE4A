@@ -11,7 +11,7 @@
     <tr><th>Prénom</th>   <td>{{ user.surname }}</td></tr>
     <tr><th>Roles</th>    <td>{{ user.roles|join(', ') }}</td></tr>
   </table>
-  <a href="{{ path('app_user_admin_index') }}" class="btn btn-secondary">
+  <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">
     ← Retour à la liste
   </a>
 {% endblock %}

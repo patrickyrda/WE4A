@@ -29,7 +29,7 @@
       }
 
       loadUserTable() {
-        fetch('{{ path('app_user_admin_index') }}', {
+        fetch('{{ path('app_admin_dashboard') }}', {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(r => r.json())

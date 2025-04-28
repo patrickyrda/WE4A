@@ -50,7 +50,7 @@ final class UEAdminController extends AbstractController{
             'u_es' => $ues,
         ]);
     }
-    #[Route('/new', name: 'app_u_e_admin_new', methods: ['GET', 'POST'])]
+    #[Route('ue/new', name: 'app_u_e_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $uE = new UE();
@@ -80,7 +80,7 @@ final class UEAdminController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}', name: 'app_u_e_admin_show', methods: ['GET'])]
+    #[Route('ue/{id}', name: 'app_u_e_admin_show', methods: ['GET'])]
     public function show(UE $uE): Response
     {
         return $this->render('ue_admin/show.html.twig', [
@@ -88,7 +88,7 @@ final class UEAdminController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_u_e_admin_edit', methods: ['GET', 'POST'])]
+    #[Route('ue/{id}/edit', name: 'app_u_e_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, UE $uE, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(UEType::class, $uE);
@@ -111,7 +111,7 @@ final class UEAdminController extends AbstractController{
     *   In here, after deleting use the Ajax request to reload the page    
     *   Maybe add Flash message to inform the user that the deletion was successful
     */
-    #[Route('/{id}', name: 'app_u_e_admin_delete', methods: ['POST'])]
+    #[Route('ue/{id}', name: 'app_u_e_admin_delete', methods: ['POST'])]
     public function delete(Request $request, UE $uE, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$uE->getId(), $request->getPayload()->getString('_token'))) {

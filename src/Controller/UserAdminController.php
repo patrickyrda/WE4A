@@ -34,8 +34,8 @@ final class UserAdminController extends AbstractController{
             'users' => $users,
         ]);
     }
-    //HERE HAVE TO FIX TO ADD THE HASHED PASSWORD!
-    #[Route('/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]
+
+    #[Route('user/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = new User();
@@ -47,28 +47,36 @@ final class UserAdminController extends AbstractController{
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->persist($user);
             $entityManager->flush();
-            /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
-            //TODO: Answer to Ajax request, when receiving succes you need to reload the window
-            return $this->json([
-                'success' => true,
-                'message' => 'User created successfully']);     
+
+            // Return a JSON response for AJAX requests
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'User created successfully',
+                ]);
+            }
+
+            // Redirect for non-AJAX requests
+            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
         }
 
-        
-        /*{return $this->render('user_admin/new.html.twig', [
-            'user' => $user,
-            'form' => $form,
-        ]);*/
-
-        return $this->json([
+        // Render the form for GET requests or invalid submissions
+        if ($request->isXmlHttpRequest()) {
+            return $this->json([
                 'form' => $this->renderView('user_admin/_form.html.twig', [
                     'user' => $user,
                     'form' => $form->createView(),
-                ])
+                ]),
             ]);
+        }
+
+        return $this->render('user_admin/new.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
     }
 
-    #[Route('/{id}', name: 'app_user_admin_show', methods: ['GET'])]
+#[Route('user/{id}', name: 'app_user_admin_show', methods: ['GET'])]
 public function show(User $user, Request $request): Response
 {
     if ($request->isXmlHttpRequest()) {
@@ -84,39 +92,47 @@ public function show(User $user, Request $request): Response
     ]);
 }
 
-    #[Route('/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
+    #[Route('user/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            
-            //TODO: Here have to check if a password was inserted, if not, don't change it, HAVE TO CHANGE THE FORM
+            // Check if a password was provided
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
                 $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             }
-           
+
             $entityManager->flush();
 
-            //return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);
+            // Return a JSON response for AJAX requests
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'User updated successfully',
+                ]);
+            }
+
+            // Redirect for non-AJAX requests
+            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
+        }
+
+        // Render the form for GET requests or invalid submissions
+        if ($request->isXmlHttpRequest()) {
             return $this->json([
-                'success' => true,
-                'message' => 'User updated successfully'
+                'form' => $this->renderView('user_admin/_edit_modal.html.twig', [
+                    'user' => $user,
+                    'form' => $form->createView(),
+                ]),
             ]);
         }
 
-        /*return $this->render('user_admin/edit.html.twig', [
+        return $this->render('user_admin/edit.html.twig', [
             'user' => $user,
             'form' => $form,
-        ]);*/
-        return $this->json([
-            'form' => $this->renderView('user_admin/_edit_modal.html.twig', [
-                'user' => $user,
-                'form' => $form->createView(),
-                ])
-            ]);
+        ]);
     }
 
     /*
@@ -124,19 +140,25 @@ public function show(User $user, Request $request): Response
     *   Maybe add Flash message to inform the user that the deletion was successful
     */
 
-    #[Route('/{id}', name: 'app_user_admin_delete', methods: ['POST'])]
+    #[Route('user/{id}', name: 'app_user_admin_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
+
+            // Return a JSON response for AJAX requests
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'User deleted successfully',
+                ]);
+            }
+
+            // Redirect for non-AJAX requests
+            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
         }
 
-
-        return $this->json([
-            'success' => true,
-            'message' => 'User deleted successfully'
-        ]);
-        /*return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);*/
+        throw $this->createAccessDeniedException('Invalid CSRF token.');
     }
 }
