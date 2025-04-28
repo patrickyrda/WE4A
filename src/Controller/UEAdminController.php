@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\UserRepository;
 
 final class UEAdminController extends AbstractController{
     #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
@@ -81,10 +82,23 @@ final class UEAdminController extends AbstractController{
     }
 
     #[Route('ue/{id}', name: 'app_u_e_admin_show', methods: ['GET'])]
-    public function show(UE $uE): Response
+    public function show(UE $uE, UserRepository $userRepository): Response
     {
+        $enrolledIds = array_map(
+            fn($ins) => $ins->getUserId()->getId(),
+            $uE->getInscriptions()->toArray()
+        );
+        $availableStudents = $userRepository->createQueryBuilder('u')
+            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
+            ->setParameter('role', '"ROLE_STUDENT"')
+            ->andWhere('u.id NOT IN (:ids)')
+            ->setParameter('ids', $enrolledIds ?: [0])
+            ->getQuery()
+            ->getResult();
+
         return $this->render('ue_admin/show.html.twig', [
             'u_e' => $uE,
+            'availableStudents' => $availableStudents,
         ]);
     }
 

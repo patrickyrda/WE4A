@@ -29,7 +29,7 @@ final class PostController extends AbstractController{
     *   User has to be logged in for the Api to return something and the ue_id has to be sent in the GET request
     *
     */
-    #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
+    #[Route('/post/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository, SluggerInterface $slugger): Response
     {   
         $user = $this->getUser();
@@ -98,7 +98,7 @@ final class PostController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
+    #[Route('/post/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
     {
         return $this->render('post/show.html.twig', [
@@ -107,7 +107,7 @@ final class PostController extends AbstractController{
     }
 
     //add logic to modify the file
-    #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
+    #[Route('/post/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
         $form = $this->createForm(PostType::class, $post);
@@ -151,7 +151,7 @@ final class PostController extends AbstractController{
 
             $entityManager->flush();
 
-            //return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
             return $this->json([
                 'success' => true,
                 'message' => 'Post updated successfully'
@@ -185,7 +185,7 @@ final class PostController extends AbstractController{
 */
     
 # Pour eviter les bugs en AJAX  
-#[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
+#[Route('/post/{id}', name: 'app_post_delete', methods: ['POST'])]
 public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
 {
     if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->getPayload()->getString('_token'))) {

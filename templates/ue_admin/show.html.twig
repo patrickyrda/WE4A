@@ -1,8 +1,10 @@
 {% extends 'base.html.twig' %}
 {% block title %}Détails UE{% endblock %}
+
 {% block body %}
   <h1>Détails de l’UE</h1>
-  <table class="table">
+
+  <table class="table mb-4">
     <tr>
       <th>Code</th>
       <td>{{ u_e.code }}</td>
@@ -14,10 +16,13 @@
     {% if u_e.imagePath %}
       <tr>
         <th>Image</th>
-        <td><img src="{{ u_e.imagePath }}" alt="" style="max-height:100px"></td>
+        <td>
+          <img src="{{ u_e.imagePath }}" alt="" style="max-height:100px">
+        </td>
       </tr>
     {% endif %}
   </table>
+
   <a class="btn btn-primary" href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">
     Modifier
   </a>
@@ -25,4 +30,83 @@
   <a class="btn btn-secondary" href="{{ path('app_admin_dashboard') }}">
     ← Retour à la liste
   </a>
+
+  {# ——— Section AJAX pour l’ajout d’un étudiant ——— #}
+  <hr>
+  <h2>Ajouter un étudiant</h2>
+  <div data-controller="ue-show">
+    <div class="input-group mb-3">
+      <select class="form-select" data-ue-show-target="select">
+        {% for student in availableStudents %}
+          <option value="{{ student.id }}">
+            {{ student.name }} {{ student.surname }}
+          </option>
+        {% endfor %}
+      </select>
+      <button
+        class="btn btn-success"
+        data-action="ue-show#addStudent"
+        {% if availableStudents|length == 0 %}disabled{% endif %}>
+        Ajouter
+      </button>
+    </div>
+
+    <ul class="list-group" data-ue-show-target="list">
+      {% for ins in u_e.inscriptions %}
+        <li class="list-group-item" data-user-id="{{ ins.userId.id }}">
+          {{ ins.userId.name }} {{ ins.userId.surname }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="module-shim">
+    import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    const application = Application.start();
+
+    class UeShowController extends Controller {
+      static targets = ['select','list'];
+
+      addStudent() {
+        const studentId = this.selectTarget.value;
+        fetch('/user/api/add_student', {
+          method: 'POST',
+          headers: {
+            'Accept':           'application/json',
+            'Content-Type':     'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            ue_id:      {{ u_e.id }},
+            student_id: studentId
+          })
+        })
+        .then(r => r.json())
+        .then(() => {
+          // retirer l’option
+          const option = this.selectTarget.querySelector(`option[value="${studentId}"]`);
+          const name   = option.textContent;
+          option.remove();
+
+          // ajouter dans la liste
+          const li = document.createElement('li');
+          li.className       = 'list-group-item';
+          li.dataset.userId  = studentId;
+          li.textContent     = name;
+          this.listTarget.appendChild(li);
+
+          // désactiver bouton si plus d’options
+          if (!this.selectTarget.options.length) {
+            this.element.querySelector('button').disabled = true;
+          }
+        })
+        .catch(console.error);
+      }
+    }
+
+    application.register('ue-show', UeShowController);
+  </script>
 {% endblock %}

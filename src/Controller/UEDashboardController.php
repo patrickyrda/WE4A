@@ -23,9 +23,11 @@ final class UEDashboardController extends AbstractController{
     #[IsGranted('ROLE_USER')]
     public function index(
         UERepository $ueRepository,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        PostRepository $postRepo
     ): Response {
         $utilisateur = $this->getUser();
+        $recentPosts = $postRepo->findBy([], ['date' => 'DESC'], 5);
         $inscriptions = $utilisateur->getInscriptions();
         $ues = $inscriptions->map(fn($i) => $i->getUeId());
         $etudiants = array_filter(
@@ -35,6 +37,7 @@ final class UEDashboardController extends AbstractController{
         return $this->render('ue_dashboard/index.html.twig', [
             'ues' => $ues,
             'etudiants' => $etudiants,
+            'recent_posts' => $recentPosts,
         ]);
     }
     /*
@@ -215,5 +218,18 @@ final class UEDashboardController extends AbstractController{
         }
 
         return $this->json($data);
+    }
+    #[Route('/ue/show/{id}', name: 'app_u_e_dashboard_show')]
+    public function show(UE $ue, UserRepository $userRepository): Response
+    {
+        $etudiants = array_filter(
+            $userRepository->findAll(),
+            fn(\App\Entity\User $u) => in_array('ROLE_STUDENT', $u->getRoles(), true)
+        );
+
+        return $this->render('ue_dashboard/show.html.twig', [
+            'u_e'       => $ue,
+            'etudiants' => $etudiants,
+        ]);
     }
 }

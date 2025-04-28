@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+{% block title %}Détails UE{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+  <h1>Détails de l’UE</h1>
+
+  <table class="table mb-4">
+    <tr><th>Code</th><td>{{ u_e.code }}</td></tr>
+    <tr><th>Titre</th><td>{{ u_e.title }}</td></tr>
+    {% if u_e.imagePath %}
+      <tr>
+        <th>Image</th>
+        <td>
+          <img src="{{ u_e.imagePath }}" style="max-height:100px" alt="{{ u_e.title }}">
+        </td>
+      </tr>
+    {% endif %}
+  </table>
+
+  <button
+    class="btn btn-info mb-3"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#participants"
+    aria-expanded="false"
+    aria-controls="participants"
+  >
+    Afficher les participants
+  </button>
+
+  <div class="collapse" id="participants">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ins in u_e.inscriptions %}
+          <tr>
+            <td>{{ ins.userId.name }}</td>
+            <td>{{ ins.userId.surname }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="2" class="text-center text-muted">Aucun étudiant.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <a class="btn btn-secondary" href="{{ path('app_user_dashboard') }}">
+    ← Retour à la liste
+  </a>
+</div>
+{% endblock %}

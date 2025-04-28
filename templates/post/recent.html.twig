@@ -1,0 +1,18 @@
+<article class="card h-100 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title mb-1">
+      <p class="mb-0">{{ post.message|u.truncate(140) }}</p>
+    </h5>
+
+    <small class="text-muted d-block mb-2">
+      {{ post.date|date('d/m/Y H:i') }}
+    </small>
+
+    {# Mini-extrait si besoin #}
+    {% if post.content is defined %}
+      <p class="card-text mb-0">
+        {{ post.content|striptags|u.truncate(140) }}
+      </p>
+    {% endif %}
+  </div>
+</article>

@@ -1,29 +1,48 @@
-{# templates/ue_dashboard/index.html.twig #}
 {% extends 'base.html.twig' %}
-
-{% block title %}Mes UE{% endblock %}
+{% block title %}Mon Espace{% endblock %}
 
 {% block body %}
- <div class="container my-5">
-   <h1 class="mb-4">Mes UE</h1>
-   <div class="row">
-     {% for ue in ues %}
-       <div class="col-md-4 mb-4">
-         <div class="card h-100 shadow-sm">
-           {% if ue.imagePath %}
-             <img src="{{ ue.imagePath }}" class="card-img-top" alt="{{ ue.title }}">
-           {% endif %}
-           <div class="card-body d-flex flex-column">
-             <h5 class="card-title">{{ ue.title }}</h5>
-             <p class="card-text text-muted">{{ ue.code }}</p>
-             <a href="{{ path('ue_show', {id: ue.id}) }}"
-                class="btn btn-outline-primary mt-auto">
-               Voir détails
-             </a>
-           </div>
-         </div>
-       </div>
-     {% endfor %}
-   </div>
- </div>
+<div class="container my-5">
+  <h1>Bienvenue sur votre tableau de bord</h1>
+  <section class="recent-posts mt-5">
+    <h2 class="h4 mb-3">Articles récents</h2>
+    <div class="row">
+      {% for post in recent_posts %}
+        <div class="col-md-4 mb-4">
+          {% include 'post/recent.html.twig' with { post: post } only %}
+        </div>
+      {% else %}
+        <div class="col-12">
+          <p class="text-muted">Aucun article récent.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="mt-5">
+    <h2 class="h4 mb-3">Mes UE</h2>
+    <div class="row">
+      {% for ue in ues %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            {% if ue.imagePath %}
+              <img src="{{ ue.imagePath }}" class="card-img-top" alt="{{ ue.title }}">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ ue.title }}</h5>
+              <p class="card-text text-muted">{{ ue.code }}</p>
+              <a href="{{ path('app_u_e_dashboard_show', { id: ue.id }) }}" class="btn btn-outline-primary mt-auto">
+                Voir détails
+              </a>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="col-12">
+          <p class="text-muted">Vous n'êtes inscrit à aucune UE.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
 {% endblock %}
