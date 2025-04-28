@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}Welcome !{% endblock %}</title>
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            href="{{ asset('css/code.css') }}?v={{ random() }}"
         rel="stylesheet"
         integrity="sha384-..."
         crossorigin="anonymous"
@@ -12,6 +12,23 @@
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
+<div class="bandeau">
+        <a class="connexion" href="{{ path('app_user_dashboard') }}">Mes cours</a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="connexion connexion1" href="{{ path('app_admin_dashboard') }}">Espace Admin</a>
+        {% endif %}
+
+
+
+    {% if app.user %}
+        <div class="user-avatar">
+            {{ app.user.name|first|upper }}{{ app.user.surname|first|upper }}
+        </div>
+    {% endif %}
+
+</div>
+
     {% block body %}{% endblock %}
 
     {% block javascripts %}

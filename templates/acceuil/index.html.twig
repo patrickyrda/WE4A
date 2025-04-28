@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord Admin{% endblock %}
+
+{% block body %}
+
+
+<body>
+
+    <div class="rectangle1">
+        <p>Plateforme pédagogique UTBM</p>
+        <div class="inner-rectangle1">
+            <p>Bienvenue à toute et à tous pour la rentrér de printemps 2025</p>
+        </div>
+        <div class="three-rectangles1">
+            <!-- Rectangle 1 -->
+            <div class="rectangle-item1">
+                <img src="https://aulasmoodle.com/wp-content/uploads/2019/09/que-es-moodle.jpg" alt="Image 1">
+                <a href="{{ path('app_user_dashboard') }}">Nouveautés UTBM</a>
+            </div>
+
+            <!-- Rectangle 2 -->
+            <div class="rectangle-item1">
+                <img src="https://www.utbm.fr/wp-content/uploads/2023/07/x-mobilize-2023-utbm.jpg" alt="Image 2">
+                <a href="{{ path('app_user_dashboard') }}">Découvrir UTBM</a>
+            </div>
+            <!-- Rectangle 3 -->
+            <div class="rectangle-item1">
+                <img src="https://moodle.utbm.fr/pluginfile.php/289229/mod_label/intro/pix-utbm%20(1).png" alt="Image 3">
+              <a href="{{ path('app_user_dashboard') }}">Pix à l'UTBM</a>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+{% endblock %}
+
