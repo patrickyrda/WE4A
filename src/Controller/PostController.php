@@ -14,6 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UERepository;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Route('/post')]
 final class PostController extends AbstractController{
@@ -173,24 +175,42 @@ final class PostController extends AbstractController{
     }
 }
 */
-#[Route('/post/{id}', name: 'app_post_delete', methods: ['POST'])]
-public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
-{
-    $token = $request->request->get('_token');
-    if ($this->isCsrfTokenValid('delete' . $post->getId(), $token)) {
-        $entityManager->remove($post);
-        $entityManager->flush();
+    #[Route('/post/{id}', name: 'app_post_delete', methods: ['POST'])]
+    public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $token = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete' . $post->getId(), $token)) {
+            $entityManager->remove($post);
+            $entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Post supprimé avec succès.'
+            ]);
+        }
 
         return $this->json([
-            'success' => true,
-            'message' => 'Post supprimé avec succès.'
-        ]);
+            'success' => false,
+            'message' => 'Token CSRF invalide.'
+        ], Response::HTTP_BAD_REQUEST);
     }
 
-    return $this->json([
-        'success' => false,
-        'message' => 'Token CSRF invalide.'
-    ], Response::HTTP_BAD_REQUEST);
-}
+    #[Route('/post/download/{filename}', name: 'post_download_file', methods: ['GET'])]
+    public function downloadFile(string $filename): Response
+    {
+        $uploadsDir = $this->getParameter('uploads_directory');
+        $filePath = $uploadsDir . '/' . $filename;
+
+        if (!file_exists($filePath)) {
+            throw $this->createNotFoundException('File not found.');
+        }
+
+        $mimeType = mime_content_type($filePath);
+        $originalFilename = pathinfo($filename, PATHINFO_BASENAME);
+
+        return $this->file($filePath, $originalFilename, ResponseHeaderBag::DISPOSITION_ATTACHMENT, [
+            'Content-Type' => $mimeType,
+        ]);
+    }
 
 }
