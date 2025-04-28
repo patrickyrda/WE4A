@@ -89,6 +89,7 @@ final class PostController extends AbstractController{
         return $this->render('post/new.html.twig', [
             'post' => $post,
             'form' => $form,
+            'ue'   => $ue,
         ]);
         return $this->json([
             'form' => $this->renderView('post/_form.html.twig', [
