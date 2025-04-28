@@ -8,12 +8,18 @@
   <div class="card-body">
 
     <p class="mb-1 fw-semibold">
-      <i class="{{ icon }} me-1"></i>
-      {% if isFile %}
-        Partage de fichier :
-        <span class="text-primary">
-          {{ post.files|first.filePath|split('/')|last }}
-        </span>
+    <i class="{{ icon }} me-1"></i>
+        {% if isFile %}
+            Partage de fichier : 
+            {% if post.files|length > 0 %}
+            {% set file = post.files|first %}
+            <a href="{{ path('post_download_file', { filename: file.filePath }) }}"
+            class="btn btn-sm btn-outline-primary"
+            download>
+            <i class="bi bi-download"></i>&nbsp;
+            {{ file.filePath|split('/')|last }}
+            </a>
+        {% endif %}
       {% else %}
         Message :
         <span class="text-success">
@@ -21,6 +27,8 @@
         </span>
       {% endif %}
     </p>
+
+    
 
     <small class="text-muted">
       {{ post.userId.name }} {{ post.userId.surname }}
