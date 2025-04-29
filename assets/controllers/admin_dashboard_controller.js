@@ -126,4 +126,6 @@ export default class extends Controller {
     this.btnStudentTarget.classList.toggle('btn-primary', !isUe);
     this.btnStudentTarget.classList.toggle('btn-outline-primary', isUe);
     }
+
+    
 }

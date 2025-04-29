@@ -1,8 +1,9 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="h5 mb-0">Liste des étudiants</h2>
-  <a href="{{ path('app_user_admin_new') }}"
-     class="btn btn-success btn-sm">
-    + Nouvel étudiant
+  <h2 class="h5 mb-0">Liste des utilisateurs</h2>
+  <a href=#
+     class="btn btn-success btn-sm"
+     id="btn-add-user">
+    + Nouvel utilisateur
   </a>
 </div>
 
@@ -24,11 +25,11 @@
         <td>{{ user.name }}</td>
         <td>{{ user.surname }}</td>
         <td>
-          <a class="btn btn-sm btn-info"
+          <a class="btn btn-sm btn-info show-button-user"
              href="{{ path('app_user_admin_show', { id: user.id }) }}">
             Voir
           </a>
-          <a class="btn btn-sm btn-primary"
+          <a class="btn btn-sm btn-primary edit-button-user"
              href="{{ path('app_user_admin_edit', { id: user.id }) }}">
             Modifier
           </a>

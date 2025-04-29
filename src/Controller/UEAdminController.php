@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\UserRepository;
-
+    
 final class UEAdminController extends AbstractController{
     #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
     public function index(UERepository $ueRepository, Request $request): Response
