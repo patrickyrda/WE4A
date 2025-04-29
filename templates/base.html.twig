@@ -21,6 +21,9 @@
 <body>
 <div class="bandeau">
         <a class="connexion" href="{{ path('app_user_dashboard') }}">Mes cours</a>
+        {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+        <a class="connexion" href="{{ path('app_login') }}">Login</a>
+        {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}
             <a class="connexion connexion1" href="{{ path('app_admin_dashboard') }}">Espace Admin</a>

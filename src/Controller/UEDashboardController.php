@@ -29,6 +29,9 @@ final class UEDashboardController extends AbstractController{
         PostRepository $postRepo
     ): Response|RedirectResponse {
         $utilisateur = $this->getUser();
+        if (!$utilisateur) {
+            return $this->redirectToRoute('app_login');
+        }
         $limit = 5;
         $inscriptions = $utilisateur->getInscriptions();
         $ues = $inscriptions
