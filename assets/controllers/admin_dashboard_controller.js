@@ -126,4 +126,41 @@ export default class extends Controller {
     this.btnStudentTarget.classList.toggle('btn-primary', !isUe);
     this.btnStudentTarget.classList.toggle('btn-outline-primary', isUe);
     }
-}
+
+    #bindUeAdminLinks () {
+      document.querySelectorAll('button[data-action="click->ue-admin#openEditForm"]').forEach(button => {
+        button.addEventListener('click', e => this.openEditModalForUe(e));
+      });
+    
+      document.querySelectorAll('button[data-action="click->ue-admin#askDelete"]').forEach(button => {
+        button.addEventListener('click', e => this.askDeleteUe(e));
+      });
+    }
+    
+    openEditModalForUe(event) {
+      event.preventDefault();
+      const url = event.currentTarget.getAttribute('data-url');
+      this.#fetchModalContent(url, 'form');
+    }
+    
+    askDeleteUe(event) {
+      event.preventDefault();
+      const url = event.currentTarget.getAttribute('data-url');
+      if (!confirm('Confirmer la suppression de cette UE ?')) return;
+    
+      fetch(url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(r => r.json())
+        .then(json => {
+          if (json.success) {
+            this.loadUeTable(new Event('dummy'));
+          } else {
+            alert(json.message || 'Erreur inconnue');
+          }
+        })
+        .catch(err => console.error('Erreur AJAX', err));
+    }
+  }    
+

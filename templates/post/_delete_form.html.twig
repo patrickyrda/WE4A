@@ -1,16 +1,11 @@
-<form method="post"
-      action="{{ path('app_post_delete', { id: post.id }) }}"
-      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette UE ?');"
-      class="d-inline delete-form"
-      data-post-id="{{ post.id }}"
-      data-action="post#askDelete">
+<input type="hidden"
+       name="_token"
+       value="{{ csrf_token('delete' ~ post.id) }}">
 
-  <input type="hidden"
-         name="_token"
-         value="{{ csrf_token('delete' ~ post.id) }}">
-
-  <button type="submit"
-          class="btn btn-outline-danger btn-sm">
-    <i class="bi bi-trash"></i> Effacer
-  </button>
-</form>
+<button
+  type="button"
+  class="btn btn-outline-danger btn-sm"
+  data-post-id="{{ post.id }}"
+  data-action="click->post-actions#deletePost">
+  <i class="bi bi-trash"></i> Effacer
+</button>

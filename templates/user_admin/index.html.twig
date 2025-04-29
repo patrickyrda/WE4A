@@ -3,10 +3,12 @@
 {% block title %}Administration des utilisateurs{% endblock %}
 
 {% block body %}
-<div class="container my-5" data-controller="admin-dashboard">
+<div class="container my-5" data-controller="user-admin">
   <h1 class="mb-4">Gestion des utilisateurs</h1>
 
-  <a href="{{ path('app_user_admin_new') }}" class="btn btn-success mb-3">
+  <a href="{{ path('app_user_admin_new') }}" 
+     class="btn btn-success mb-3"
+     data-action="user-admin#openEditModal">
     + Nouvel utilisateur
   </a>
 
@@ -14,36 +16,24 @@
     {{ include('user_admin/_table.html.twig', { users: users }) }}
   </div>
 </div>
+
+{# Modal Bootstrap pour créer / éditer / voir un user #}
+<div class="modal fade" id="modalUserAdmin" tabindex="-1" aria-labelledby="modalUserAdminLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" data-user-admin-target="modalContent">
+      <!-- Le contenu AJAX (formulaires) sera injecté ici -->
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
   <script type="module">
-    import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    import { Application } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    import UserAdminController from '/assets/controllers/user_admin_controller.js';
 
     const application = Application.start();
-
-    class AdminDashboardController extends Controller {
-      connect() {
-        this.loadUserTable();
-      }
-
-      loadUserTable() {
-        fetch('{{ path('app_admin_dashboard') }}', {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(r => r.json())
-        .then(json => {
-          if (json.success) {
-            document
-              .getElementById('user-table-container')
-              .innerHTML = json.html;
-          }
-        })
-        .catch(err => console.error('Erreur AJAX', err));
-      }
-    }
-
-    application.register('admin-dashboard', AdminDashboardController);
+    application.register('user-admin', UserAdminController);
   </script>
 {% endblock %}

@@ -1,37 +1,66 @@
-{% extends 'base.html.twig' %}
+{% if isModal is defined and isModal %}
+  {# Mode modal : pas d'extends base, pas de body complet #}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5>Posts pour {{ u_e.code }} – {{ u_e.title }}</h5>
 
-{% block title %}Post index{% endblock %}
+    <a href="{{ path('app_post_new', { ue_id: u_e.id }) }}"
+       target="_blank"
+       class="btn btn-primary">
+      + Nouveau post
+    </a>
+  </div>
 
-{% block body %}
-    <h1>Post index</h1>
+  <div class="list-group">
+    {% for post in posts %}
+      {% include 'post/item.html.twig' with { post: post } only %}
+    {% else %}
+      <div class="text-muted text-center py-3">
+        Aucun post trouvé pour cette UE.
+      </div>
+    {% endfor %}
+  </div>
 
-    <table class="table">
+{% else %}
+  {# Mode normal (page complète) #}
+  {% extends 'base.html.twig' %}
+
+  {% block title %}Posts{% endblock %}
+
+  {% block body %}
+    <div class="container my-5">
+      <h1 class="mb-4">Posts</h1>
+
+      <a class="btn btn-primary mb-4" href="{{ path('app_post_new') }}">
+        + Créer un nouveau post
+      </a>
+
+      <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Message</th>
-                <th>Date</th>
-                <th>actions</th>
-            </tr>
+          <tr>
+            <th>Id</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
-        {% for post in posts %}
+          {% for post in posts %}
             <tr>
-                <td>{{ post.id }}</td>
-                <td>{{ post.message }}</td>
-                <td>{{ post.date ? post.date|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
-                    <a href="{{ path('app_post_edit', {'id': post.id}) }}">edit</a>
-                </td>
+              <td>{{ post.id }}</td>
+              <td>{{ post.message }}</td>
+              <td>{{ post.date ? post.date|date('d/m/Y H:i') : '-' }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ path('app_post_show', {'id': post.id}) }}">Voir</a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_post_edit', {'id': post.id}) }}">Modifier</a>
+              </td>
             </tr>
-        {% else %}
+          {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+              <td colspan="4" class="text-center text-muted">Aucun post trouvé.</td>
             </tr>
-        {% endfor %}
+          {% endfor %}
         </tbody>
-    </table>
-
-    <a href="{{ path('app_post_new') }}">Create new</a>
-{% endblock %}
+      </table>
+    </div>
+  {% endblock %}
+{% endif %}

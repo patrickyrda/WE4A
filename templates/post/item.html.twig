@@ -8,17 +8,12 @@
   <div class="card-body">
 
     <p class="mb-1 fw-semibold">
-    <i class="{{ icon }} me-1"></i>
-        {% if isFile %}
-            Partage de fichier : 
-            {% if post.files|length > 0 %}
-            {% set file = post.files|first %}
-            <a href="{{ path('post_download_file', { filename: file.filePath }) }}"
-            class="btn btn-sm btn-outline-primary"
-            download>
-            <i class="bi bi-download"></i>&nbsp;
-            {{ file.filePath|split('/')|last }}
-            </a>
+      <i class="{{ icon }} me-1"></i>
+      {% if isFile %}
+        Partage de fichier :
+        {% if post.files|length > 0 %}
+          {% set file = post.files|first %}
+          {{ file.filePath|split('/')|last }}
         {% endif %}
       {% else %}
         Message :
@@ -28,21 +23,25 @@
       {% endif %}
     </p>
 
-    
-
     <small class="text-muted">
       {{ post.userId.name }} {{ post.userId.surname }}
       – {{ post.date|date('d/m/Y H:i') }}
     </small>
 
-    {% if is_granted('ROLE_TEACHER') %}
+    {# {% if is_granted('ROLE_TEACHER') %} #}
       <div class="btn-group btn-group-sm float-end">
-        <a class="btn btn-outline-secondary"
-           href="{{ path('app_post_edit', { id: post.id }) }}">
-          Modifier
-        </a>
+       <button
+  class="btn btn-outline-secondary"
+  type="button"
+  data-bs-toggle="modal"
+  data-bs-target="#postModal"
+  data-post-id="{{ post.id }}"
+  data-action="click->post-actions#loadEditForm">
+  Modifier
+</button>
+
         {% include 'post/_delete_form.html.twig' with { post: post } only %}
       </div>
-    {% endif %}
+    {# {% endif %} #}
   </div>
 </article>

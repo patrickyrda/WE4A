@@ -1,21 +1,21 @@
-{{ form_start(form) }}
+{{ form_start(form, { 'attr': { 'data-action': 'submit->ue-admin#submitForm' } }) }}
   <div class="mb-3">
     {{ form_label(form.code) }}
-    {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+    {{ form_widget(form.code, { 'attr': { 'class': 'form-control' } }) }}
     {{ form_errors(form.code) }}
   </div>
   <div class="mb-3">
     {{ form_label(form.title) }}
-    {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+    {{ form_widget(form.title, { 'attr': { 'class': 'form-control' } }) }}
     {{ form_errors(form.title) }}
   </div>
   <div class="mb-3">
     {{ form_label(form.image_path) }}
-    {{ form_widget(form.image_path, {'attr': {'class': 'form-control'}}) }}
+    {{ form_widget(form.image_path, { 'attr': { 'class': 'form-control' } }) }}
     {{ form_help(form.image_path) }}
     {{ form_errors(form.image_path) }}
   </div>
-  <button class="btn btn-success">
+  <button type="submit" class="btn btn-success">
     {{ button_label|default('Enregistrer') }}
   </button>
 {{ form_end(form) }}

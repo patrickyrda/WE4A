@@ -1,38 +1,46 @@
 {% extends 'base.html.twig' %}
+
 {% block title %}Administration des UE{% endblock %}
 
 {% block body %}
-  <div id="ue-table-container">
-    {{ include('ue_admin/_table.html.twig', {ues: u_es}) }}
+  <div class="container my-4" data-controller="admin-dashboard ue-admin">
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4">Gestion des UEs</h1>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        data-action="click->ue-admin#openCreateForm">
+        Ajouter une UE
+      </button>
+    </div>
+
+    <div id="ue-table-container">
+      {{ include('ue_admin/_table.html.twig', { ues: u_es }) }}
+    </div>
+
+  </div>
+
+  {# Modal pour créer/modifier une UE #}
+  <div class="modal fade" id="modalUe" tabindex="-1" aria-labelledby="modalUeLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content" id="modalUeContent">
+        <!-- Formulaire UE injecté ici par AJAX -->
+      </div>
+    </div>
   </div>
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
   <script type="module">
-    import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    import { Application } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
+    import AdminDashboardController from '/assets/controllers/admin_dashboard_controller.js';
+    import UeAdminController from '/assets/controllers/ue_admin_controller.js';
+
     const application = Application.start();
-    class AdminDashboardController extends Controller {
-      connect() {
-        this.loadUeTable();
-      }
-
-      loadUeTable() {
-        fetch('{{ path('app_u_e_admin_index') }}', {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-          .then(r => r.json())
-          .then(json => {
-            if (json.success) {
-              document
-                .getElementById('ue-table-container')
-                .innerHTML = json.html;
-            }
-          })
-          .catch(e => console.error('Erreur AJAX', e));
-      }
-    }
-
     application.register('admin-dashboard', AdminDashboardController);
+    application.register('ue-admin', UeAdminController);
   </script>
 {% endblock %}

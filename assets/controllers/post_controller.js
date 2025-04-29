@@ -66,7 +66,9 @@ export default class extends Controller {
   }
 
   fetchFormAndShowModal(url) {
-    fetch(url)
+    fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
       .then(response => response.json())
       .then(data => {
         this.ensureModalExists();

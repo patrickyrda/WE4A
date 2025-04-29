@@ -7,13 +7,17 @@
     <h1 class="h3 mb-0">
       {{ u_e.code }} – {{ u_e.title }}
     </h1>
-
-    {% if is_granted('ROLE_TEACHER') %}
-      <a class="btn btn-primary"
-         href="{{ path('app_post_new', { ue_id: u_e.id }) }}">
-        Créer un nouveau post
-      </a>
-    {% endif %}
+{# {% if is_granted('ROLE_TEACHER') %} #}
+  <button
+    class="btn btn-primary mb-4"
+    data-bs-toggle="modal"
+    data-bs-target="#postModal"
+    data-ue-id="{{ u_e.id }}"
+    id="createPostButton"
+  >
+    Créer un nouveau post
+  </button>
+{# {% endif %} #}
   </div>
   <button
     class="btn btn-info mb-3"
@@ -65,4 +69,24 @@
     </div>
   </section>
 </div>
+
+
+<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="postModalLabel">Créer un post</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body" id="postModalBody">
+        <div class="text-center my-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
