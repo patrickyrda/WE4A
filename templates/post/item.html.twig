@@ -29,8 +29,9 @@
 
     {% if is_granted('ROLE_TEACHER') %}
       <div class="btn-group btn-group-sm float-end">
-        <a class="btn btn-outline-secondary"
-           href="{{ path('app_post_edit', { id: post.id }) }}">
+        <a class="btn btn-outline-secondary modifier-buttons"
+           href=#
+           data-post-id = "{{ post.id }}" >
           Modifier
         </a>
         {% include 'post/_delete_form.html.twig' with { post: post } only %}
