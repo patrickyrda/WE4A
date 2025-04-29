@@ -150,7 +150,7 @@ final class PostController extends AbstractController{
                 $post->addFile($file);
                 $entityManager->persist($file);
             }
-
+            //THIS IS TO CONFIMT
             $entityManager->flush();
 
             //return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
