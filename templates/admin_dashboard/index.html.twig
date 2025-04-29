@@ -22,7 +22,7 @@
         class="btn btn-secondary"
         data-action="click->admin-dashboard#loadUserTable"
       >
-        Gérer les étudiants
+        Gérer les utilisateurs
       </button>
     </div>
     <div id="ue-container" data-admin-dashboard-target="ueContainer">
@@ -35,6 +35,8 @@
   </div>
   {% include 'admin_dashboard/modal.html.twig' %}
   {% include 'admin_dashboard/editmodal.html.twig' %}
+  {% include 'admin_dashboard/modalue.html.twig' %}
+  {% include 'admin_dashboard/editmodalue.html.twig' %}
 {% endblock %}
 
 {% block javascripts %}
@@ -152,6 +154,187 @@
   });
 });
 
+  let currentUserId = 0;
+
+  // Edit button delegation (Turbo-compatible)
+  document.addEventListener('click', function (event) {
+    const target = event.target.closest('.edit-button-user');
+    if (target) {
+      event.preventDefault();
+
+      const userId = target.getAttribute('data-user-id');
+      currentUserId = userId;
+
+      const url = `{{ path('app_user_admin_edit', { id: 'USER_ID' }) }}`.replace('USER_ID', userId);
+
+      fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.form) {
+          const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+          document.getElementById('modalContentEdit').innerHTML = decodedForm;
+
+          const modal = new bootstrap.Modal(document.getElementById('userModalEdit'));
+          modal.show();
+        } else {
+          console.error('No form returned from server.');
+        }
+      })
+      .catch(error => console.error('Fetch form error:', error));
+    }
+  });
+
+  // Submit edited form via AJAX
+  document.addEventListener('click', function (event) {
+    if (event.target.id === 'modifyUser') {
+      event.preventDefault();
+
+      const form = document.querySelector('#modalContentEdit form');
+      const formData = new FormData(form);
+
+      const url = `{{ path('app_user_admin_edit', { id: 'USER_ID' }) }}`.replace('USER_ID', currentUserId);
+
+      fetch(url, {
+        method: form.method,
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('userModalEdit'));
+          modal.hide();
+          location.reload();
+        } else if (data.form) {
+          const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+          document.getElementById('modalContentEdit').innerHTML = decodedForm;
+        } else {
+          console.error('Unknown error submitting form:', data);
+        }
+      })
+      .catch(error => console.error('Submit error:', error));
+    }
+  });
+
+  //pour les ues
+  let currentUeId = 0;
+
+// Handle UE creation
+document.addEventListener('click', function (event) {
+  const target = event.target.closest('#btn-add-ue');
+  if (target) {
+    event.preventDefault();
+
+    fetch('{{ path("app_u_e_admin_new") }}', {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.form) {
+        const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+        document.getElementById('modalUeContent').innerHTML = decodedForm;
+
+        const ueModal = new bootstrap.Modal(document.getElementById('ueModal'));
+        ueModal.show();
+      } else {
+        console.error('Form not received for UE creation.');
+      }
+    })
+    .catch(error => console.error('Error fetching UE form:', error));
+  }
+});
+
+// Submit UE creation form
+document.addEventListener('click', function (event) {
+  if (event.target.id === 'saveUe') {
+    const form = document.querySelector('#modalUeContent form');
+    const formData = new FormData(form);
+    const actionUrl = '{{ path("app_u_e_admin_new") }}';
+
+    fetch(actionUrl, {
+      method: form.method,
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('ueModal')).hide();
+        location.reload();
+      } else if (data.form) {
+        const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+        document.getElementById('modalUeContent').innerHTML = decodedForm;
+      } else {
+        console.error('Error creating UE:', data);
+      }
+    })
+    .catch(error => console.error('Error submitting UE form:', error));
+  }
+});
+
+// Handle UE editing
+document.addEventListener('click', function (event) {
+  const target = event.target.closest('.edit-button-ue');
+  if (target) {
+    event.preventDefault();
+
+    currentUeId = target.getAttribute('data-ue-id');
+    const url = `{{ path('app_u_e_admin_edit', { id: 'UE_ID' }) }}`.replace('UE_ID', currentUeId);
+
+    fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.form) {
+        const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+        document.getElementById('modalUeContentEdit').innerHTML = decodedForm;
+
+        const ueEditModal = new bootstrap.Modal(document.getElementById('ueModalEdit'));
+        ueEditModal.show();
+      } else {
+        console.error('No form received for UE editing.');
+      }
+    })
+    .catch(error => console.error('Error loading UE edit form:', error));
+  }
+});
+
+// Submit UE edit form
+document.addEventListener('click', function (event) {
+  if (event.target.id === 'modifyUe') {
+    event.preventDefault();
+
+    const form = document.querySelector('#modalUeContentEdit form');
+    const formData = new FormData(form);
+    const url = `{{ path('app_u_e_admin_edit', { id: 'UE_ID' }) }}`.replace('UE_ID', currentUeId);
+
+    fetch(url, {
+      method: form.method,
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('ueModalEdit')).hide();
+        location.reload();
+      } else if (data.form) {
+        const decodedForm = new DOMParser().parseFromString(data.form, 'text/html').body.innerHTML;
+        document.getElementById('modalUeContentEdit').innerHTML = decodedForm;
+      } else {
+        console.error('Error updating UE:', data);
+      }
+    })
+    .catch(error => console.error('Error submitting edited UE form:', error));
+  }
+});
   </script>
   
 {% endblock %}

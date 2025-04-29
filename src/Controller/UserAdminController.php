@@ -99,40 +99,32 @@ public function show(User $user, Request $request): Response
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Check if a password was provided
+            
+            //TODO: Here have to check if a password was inserted, if not, don't change it, HAVE TO CHANGE THE FORM
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
                 $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             }
-
+           
             $entityManager->flush();
 
-            // Return a JSON response for AJAX requests
-            if ($request->isXmlHttpRequest()) {
-                return $this->json([
-                    'success' => true,
-                    'message' => 'User updated successfully',
-                ]);
-            }
-
-            // Redirect for non-AJAX requests
-            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
-        }
-
-        // Render the form for GET requests or invalid submissions
-        if ($request->isXmlHttpRequest()) {
+            //return $this->redirectToRoute('app_user_admin_index', [], Response::HTTP_SEE_OTHER);
             return $this->json([
-                'form' => $this->renderView('user_admin/_edit_modal.html.twig', [
-                    'user' => $user,
-                    'form' => $form->createView(),
-                ]),
+                'success' => true,
+                'message' => 'User updated successfully'
             ]);
         }
 
-        return $this->render('user_admin/edit.html.twig', [
+        /*return $this->render('user_admin/edit.html.twig', [
             'user' => $user,
             'form' => $form,
-        ]);
+        ]);*/
+        return $this->json([
+            'form' => $this->renderView('user_admin/_form.html.twig', [
+                'user' => $user,
+                'form' => $form->createView(),
+                ])
+            ]);
     }
 
     /*

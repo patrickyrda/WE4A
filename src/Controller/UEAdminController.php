@@ -61,18 +61,17 @@ final class UEAdminController extends AbstractController{
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($uE);
             $entityManager->flush();
-            
              //TODO: Answer to Ajax request, when receiving succes you need to reload the window
-            return $this->redirectToRoute('app_admin_dashboard', [], Response::HTTP_SEE_OTHER);
+            //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
             return $this->json([
                 'success' => true,
                 'message' => 'UE created successfully']);
         }
 
-        return $this->render('ue_admin/new.html.twig', [
+        /*return $this->render('ue_admin/new.html.twig', [
             'u_e' => $uE,
             'form' => $form,
-        ]);
+        ]);*/
         return $this->json([
             'form' => $this->renderView('ue_admin/_form.html.twig', [
                 'u_e' => $uE,
@@ -103,22 +102,29 @@ final class UEAdminController extends AbstractController{
     }
 
     #[Route('ue/{id}/edit', name: 'app_u_e_admin_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, UE $uE, EntityManagerInterface $em): Response
+    public function edit(Request $request, UE $uE, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(UEType::class, $uE);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            return $this->redirectToRoute('app_admin_dashboard');
+            $entityManager->flush();
+
+            //return $this->redirectToRoute('app_u_e_admin_index', [], Response::HTTP_SEE_OTHER);
+            return $this->json([
+                'success' => true,
+                'message' => 'UE updated successfully']);
         }
-        return $this->render('ue_admin/edit.html.twig', [
+
+        /*return $this->render('ue_admin/edit.html.twig', [
             'u_e' => $uE,
-            'form' => $form->createView(),
-        ]);
-        return $this->render('ue_admin/edit.html.twig', [
-            'ue'   => $ue,
-            'form' => $form->createView(),
+            'form' => $form,
+        ]);*/
+        return $this->json([
+            'form' => $this->renderView('ue_admin/_form.html.twig', [
+                'u_e' => $uE,
+                'form' => $form->createView()
+            ])
         ]);
     }
     /*
