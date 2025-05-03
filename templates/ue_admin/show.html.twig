@@ -37,9 +37,10 @@
   <div data-controller="ue-show">
     <div class="input-group mb-3">
       <select class="form-select" data-ue-show-target="select">
+       <option value="" disabled selected hidden>Veuillez sélectionner un étudiant</option>
         {% for student in availableStudents %}
           <option value="{{ student.id }}">
-            {{ student.name }} {{ student.surname }}
+            {{ student.name }} {{ student.surname }} - {{ student.email }}
           </option>
         {% endfor %}
       </select>
@@ -54,8 +55,11 @@
     <ul class="list-group" data-ue-show-target="list">
       {% for ins in u_e.inscriptions %}
         <li class="list-group-item" data-user-id="{{ ins.userId.id }}">
-          {{ ins.userId.name }} {{ ins.userId.surname }}
+          {{ ins.userId.name }} {{ ins.userId.surname }} - {{ ins.userId.email }}
         </li>
+        <button class="btn btn-danger btn-sm remove-student-btn" data-student-id="{{ ins.userId.id }}">
+        Enlever
+      </button>
       {% endfor %}
     </ul>
   </div>
@@ -102,11 +106,42 @@
           if (!this.selectTarget.options.length) {
             this.element.querySelector('button').disabled = true;
           }
+          window.location.reload();
         })
         .catch(console.error);
       }
     }
 
     application.register('ue-show', UeShowController);
+
+    document.querySelectorAll('.remove-student-btn').forEach(button => {
+  button.addEventListener('click', function () {
+    const studentId = this.getAttribute('data-student-id');
+    console.log("Student id : ", studentId);
+
+    const url = `/user/api/supprimer-etudiant`;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        user_id: studentId,
+        ue_id: {{u_e.id}}
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+      window.location.reload();
+      }
+    })
+    .catch(error => {
+      console.error('Error removing student:', error);
+    });
+  });
+});
   </script>
 {% endblock %}

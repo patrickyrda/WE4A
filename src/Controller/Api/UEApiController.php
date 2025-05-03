@@ -33,7 +33,6 @@ class UEApiController extends AbstractController
     }
 
     #[Route('/{id}/ajouter-etudiant', name: 'ajouter_etudiant', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
     public function ajouterEtudiant(
         int $id,
         Request $requete,
@@ -64,4 +63,36 @@ class UEApiController extends AbstractController
 
         return $this->json(['id' => $ue->getId(), 'etudiants' => $etudiants]);
     }
-}
+
+    #[Route('{id}/supprimer-etudiant', name: 'supprimer_etudiant', methods: ['POST'])]
+    public function supprimerEtudiant(
+        int $id,
+        Request $requete,
+        UeRepository $ueRepository,
+        UserRepository $userRepository,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $IDetudiant = $requete->request->get('IDetudiant');
+
+        if (!$IDetudiant) {
+            return $this->json(['erreur' => 'IDetudiant manquant'], 400);
+        }
+
+        $ue = $ueRepository->find($id);
+        $etudiant = $userRepository->find($IDetudiant);
+
+        if (!$ue || !$etudiant) {
+            return $this->json(['erreur' => 'UE ou étudiant introuvable'], 404);
+        }
+
+        $ue->removeStudent($etudiant);
+        $em->flush();
+
+        $etudiants = array_map(
+            fn($e) => ['id' => $e->getId(), 'nom' => $e->getFullName()],
+            $ue->getStudents()->toArray()
+        );
+
+        return $this->json(['id' => $ue->getId(), 'etudiants' => $etudiants]);
+    }
+}   

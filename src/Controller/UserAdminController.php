@@ -44,6 +44,9 @@ final class UserAdminController extends AbstractController{
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
+            if (!$plainPassword) {
+                $plainPassword = 'password120';
+            }
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->persist($user);
             $entityManager->flush();
@@ -104,7 +107,7 @@ public function show(User $user, Request $request): Response
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
                 $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
-            }
+            } 
            
             $entityManager->flush();
 

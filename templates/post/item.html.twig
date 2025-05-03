@@ -11,15 +11,17 @@
       <i class="{{ icon }} me-1"></i>
       {% if isFile %}
         Partage de fichier :
-        <span class="text-primary">
-          {{ post.files|first.filePath|split('/')|last }}
-        </span>
-      {% else %}
+        {% set fileName = post.files|first.filePath|split('/')|last %}
+        {# TODO:::::::::::: ADD ICON HERE #}
+        <a class="text-primary text-decoration-underline"
+          href="{{ path('post_download_file', { filename: fileName }) }}">
+          {{ fileName }}
+        </a>
+      {% endif %}
         Message :
         <span class="text-success">
           {{ post.message|u.truncate(80, '…') }}
         </span>
-      {% endif %}
     </p>
 
     <small class="text-muted">

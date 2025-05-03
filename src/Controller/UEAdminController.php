@@ -18,22 +18,6 @@ final class UEAdminController extends AbstractController{
     #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
     public function index(UERepository $ueRepository, Request $request): Response
     {
-        /*$ues = $uERepository->createQueryBuilder('u')
-            ->select('u.id, u.code, u.title, u.image_path')
-            ->getQuery()
-            ->getResult();
-                
-        $content = [
-            'data' => $ues
-        ];
-
-        $data = $serializer->serialize($content, 'json'); 
-
-        return JsonResponse::fromJsonString($data);*/
-        /*return $this->render('ue_admin/index.html.twig', [
-            'u_es' => $uERepository->findAll(),
-        ]);*/
-
         $ues = $ueRepository->findAll();
 
         if ($request->isXmlHttpRequest()) {
@@ -68,10 +52,7 @@ final class UEAdminController extends AbstractController{
                 'message' => 'UE created successfully']);
         }
 
-        /*return $this->render('ue_admin/new.html.twig', [
-            'u_e' => $uE,
-            'form' => $form,
-        ]);*/
+        
         return $this->json([
             'form' => $this->renderView('ue_admin/_form.html.twig', [
                 'u_e' => $uE,
@@ -88,8 +69,9 @@ final class UEAdminController extends AbstractController{
             $uE->getInscriptions()->toArray()
         );
         $availableStudents = $userRepository->createQueryBuilder('u')
-            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
+            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1 OR JSON_CONTAINS(u.roles, :teacherRole) = 1')
             ->setParameter('role', '"ROLE_STUDENT"')
+            ->setParameter('teacherRole', '"ROLE_TEACHER"')
             ->andWhere('u.id NOT IN (:ids)')
             ->setParameter('ids', $enrolledIds ?: [0])
             ->getQuery()

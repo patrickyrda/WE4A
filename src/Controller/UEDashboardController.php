@@ -178,6 +178,37 @@ final class UEDashboardController extends AbstractController{
             return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
     }
 
+    #[Route('/user/api/supprimer-etudiant', name: 'supprimer_etudiant', methods: ['POST'])]
+    public function supprimerEtudiant(
+        Request $request,
+        UeRepository $ueRepository,
+        UserRepository $userRepository,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+        }
+        
+        $ue_id = $data['ue_id'] ?? null;
+        $user_id = $data['user_id'] ?? null;
+        if (!$ue_id || !$user_id) {
+            return $this->json(['erreur' => 'ue_id ou user_id manquant'], 400);
+        }
+
+        $ue = $ueRepository->find($ue_id);
+        $etudiant = $userRepository->find($user_id);
+        if (!$ue || !$etudiant) {
+            return $this->json(['erreur' => 'UE ou étudiant introuvable'], 404);
+        }
+
+        $ue->removeStudent($etudiant);
+        $em->flush();
+
+        return new JsonResponse(['success'=>true,'message'=>'Étudiant removed'], 200);
+    }
+
 
     #[Route('/user/api/get_news', name: 'user_api_get_news')]
     public function getNews(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse) : Response 
@@ -189,11 +220,15 @@ final class UEDashboardController extends AbstractController{
 
         $conn = $entityManager->getConnection();
 
-        $query = 'SELECT u.code ,p.message, p.date FROM post p 
+        $query = 'SELECT f.file_path, us.name, us.surname, us.email, u.code, p.message, p.date
+        FROM post p
         INNER JOIN ue u ON p.ue_id_id = u.id 
         INNER JOIN inscriptions i ON i.ue_id_id = u.id
-        WHERE i.user_id_id = :user_id
-        ORDER BY p.date DESC LIMIT 15';
+        INNER JOIN user us ON us.id = i.user_id_id 
+        LEFT JOIN file f ON f.post_id = p.id
+        WHERE us.id = :user_id
+        ORDER BY p.date DESC
+        LIMIT 15;';
 
         $stmt = $conn->prepare($query);
         $result = $stmt->executeQuery(['user_id' => $user->getId()]);

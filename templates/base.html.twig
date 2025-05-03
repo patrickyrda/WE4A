@@ -24,6 +24,9 @@
         {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
         <a class="connexion" href="{{ path('app_login') }}">Login</a>
         {% endif %}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <a class="connexion connexion1" href="{{ path('app_logout') }}">Logout</a>
+        {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}
             <a class="connexion connexion1" href="{{ path('app_admin_dashboard') }}">Espace Admin</a>
@@ -32,9 +35,11 @@
 
 
     {% if app.user %}
-        <div class="user-avatar">
+        <a href="{{ path('app_user_management', { 'id': app.user.id }) }}">
+            <div class="user-avatar">
             {{ app.user.name|first|upper }}{{ app.user.surname|first|upper }}
-        </div>
+            </div>
+        </a>
     {% endif %}
 
 </div>

@@ -142,4 +142,21 @@ class UE
 
         return $this;
     }
+
+    public function addStudent(User $student): static
+    {
+        $this->inscriptions[] = new Inscriptions($this, $student);
+        return $this;
+    }
+
+    public function removeStudent(User $student): static
+    {
+        foreach ($this->inscriptions as $inscription) {
+            if ($inscription->getUserId() === $student) {
+                $this->removeInscription($inscription);
+                break;
+            }
+        }
+        return $this;
+    }
 }
