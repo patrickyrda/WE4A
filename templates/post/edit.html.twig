@@ -61,6 +61,7 @@
 {% block javascripts %}
   {{ parent() }}
   <script>
+    {# On attend le chargement du DOM #}
     document.addEventListener('DOMContentLoaded', () => {
       const tBtn      = document.getElementById('tab-text'),
             fBtn      = document.getElementById('tab-file'),
@@ -70,27 +71,30 @@
             // si au moins un fichier est déjà attaché, on ouvre l’onglet 'file'
             initial   = {{ post.files|length > 0 ? "'file'" : "'text'" }};
 
+      {# Fonction de bascule entre les onglets #}
       function toggle(type) {
+        {# On affiche la section correspondante et on cache l’autre #}
         const isText = type === 'text';
         tDiv.classList.toggle('d-none', !isText);
         fDiv.classList.toggle('d-none',  isText);
-
+        
         tBtn.classList.toggle('btn-primary',         isText);
         tBtn.classList.toggle('btn-outline-primary', !isText);
         fBtn.classList.toggle('btn-primary',         !isText);
         fBtn.classList.toggle('btn-outline-primary',  isText);
       }
-
+      {# Fonction pour ajuster dynamiquement la hauteur du textarea #}
       function autoResize(el) {
         el.style.height = 'auto';
         el.style.height = el.scrollHeight + 'px';
       }
 
+      {# On ajoute des écouteurs d’événements #}
       tBtn.addEventListener('click', () => toggle('text'));
       fBtn.addEventListener('click', () => toggle('file'));
       textarea && textarea.addEventListener('input', () => autoResize(textarea));
 
-      // initialisation
+      {# On initialise à l'ouverture de la page #}
       toggle(initial);
       textarea && autoResize(textarea);
     });

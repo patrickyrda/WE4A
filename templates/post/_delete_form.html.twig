@@ -1,10 +1,13 @@
+{# Suppresion d'un post #}
 <form method="post"
+      {# Route vers l'api de suppresion #}
       action="{{ path('app_post_delete', { id: post.id }) }}"
       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette UE ?');"
       class="d-inline delete-form"
       data-post-id="{{ post.id }}"
       data-action="post#askDelete">
 
+  {# Token CSRF pour la sécuriser la suppresion #}
   <input type="hidden"
          name="_token"
          value="{{ csrf_token('delete' ~ post.id) }}">

@@ -6,8 +6,10 @@ export default class extends Controller {
   static values = { active: String };
   
   connect () {
+    // Si aucune valeur active n'est définie, on initialise à 'ue'
     if (!this.hasActiveValue) this.activeValue = 'ue';
-+   this._updateButtons();
+    // this._updateButtons();
+    // Chargement des UEs par défaut
     this._fetchAndInject('/ue/admin', 'ueContainer');
   }
 
@@ -21,13 +23,15 @@ export default class extends Controller {
     this.#fetchAndInject('/user/admin', 'userContainer')
   }
 
+  //Effectue requête AJAX et injecte le contenu dans la cible
   #fetchAndInject (url, targetName) {
+    // Vide le contenu de l'autre conteneur pour éviter les conflits
     if (targetName === 'ueContainer') {
       this.userContainerTarget.innerHTML = ''
     } else {
       this.ueContainerTarget.innerHTML = ''
     }
-
+    // Effectue une requête AJAX pour récupérer les données
     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(r => {
         if (!r.ok) throw new Error(`Status ${r.status}`)
@@ -35,7 +39,9 @@ export default class extends Controller {
       })
       .then(json => {
         if (json.success) {
+          // Injecte le contenu HTML dans la cible
           this[`${targetName}Target`].innerHTML = json.html
+          // Vérifie si le conteneur est celui des utilisateurs
           if (targetName === 'userContainer') {
             this.#bindUserAdminLinks()
           }
@@ -44,27 +50,34 @@ export default class extends Controller {
       .catch(err => console.error('Erreur AJAX', err))
   }
 
+  // Lie les liens d'administration des utilisateurs aux événements d'ouverture de modal
   #bindUserAdminLinks () {
     document.querySelectorAll('a[href]').forEach(link => {
       const href = link.getAttribute('href')
+      // Si le lien est pour l'édition d'un utilisateur
       if (href?.startsWith('/user/admin/') && href.includes('/edit')) {
         link.addEventListener('click', e => this.openEditModal(e))
-      } else if (href?.startsWith('/user/admin/') && !href.includes('/edit') && !href.includes('/new')) {
+      }
+      // Si le lien est pour l'affichage d'un utilisateur 
+      else if (href?.startsWith('/user/admin/') && !href.includes('/edit') && !href.includes('/new')) {
         link.addEventListener('click', e => this.openShowModal(e))
       }
     })
   }
 
+  // Modal d'affichage
   openShowModal (event) {
     event.preventDefault()
     this.#fetchModalContent(event.currentTarget.href, 'content')
   }
 
+  // Modal d'edition
   openEditModal (event) {
     event.preventDefault()
     this.#fetchModalContent(event.currentTarget.href, 'form')
   }
 
+  // Récupere le contenu d'un modal via AJAX
   #fetchModalContent (url, key) {
     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(r => r.json())
@@ -81,6 +94,7 @@ export default class extends Controller {
       .catch(err => console.error('Erreur AJAX', err))
   }
 
+  // Lie le formulaire de soumission dans le modal
   #bindFormSubmit (modal) {
     const form = this.modalContentTarget.querySelector('form')
     if (!form) return
@@ -96,6 +110,7 @@ export default class extends Controller {
             modal.hide()
             this.loadUserTable(new Event('dummy'))
           } else if (json.form) {
+            // Injecte le nouveau contenu du formulaire dans le modal
             this.modalContentTarget.innerHTML = json.form
             this.#bindFormSubmit(modal)
           }
@@ -104,6 +119,7 @@ export default class extends Controller {
     })
   }
 
+  // Vérifie si le modal existe déjà
   #ensureModalExists () {
     if (!this.hasModalTarget) {
       const modal = document.createElement('div')
@@ -119,13 +135,13 @@ export default class extends Controller {
       this.modalContentTarget = modal.querySelector('[data-admin-dashboard-target="modalContent"]')
     }
   }
-  _updateButtons() {
-    const isUe = this.activeValue === 'ue';
-    this.btnUeTarget.classList.toggle('btn-primary', isUe);
-    this.btnUeTarget.classList.toggle('btn-outline-primary', !isUe);
-    this.btnStudentTarget.classList.toggle('btn-primary', !isUe);
-    this.btnStudentTarget.classList.toggle('btn-outline-primary', isUe);
-    }
 
-    
+  // Pas encore utiliser
+  // _updateButtons() {
+  //   const isUe = this.activeValue === 'ue';
+  //   this.btnUeTarget.classList.toggle('btn-primary', isUe);
+  //   this.btnUeTarget.classList.toggle('btn-outline-primary', !isUe);
+  //   this.btnStudentTarget.classList.toggle('btn-primary', !isUe);
+  //   this.btnStudentTarget.classList.toggle('btn-outline-primary', isUe);
+  //   }
 }

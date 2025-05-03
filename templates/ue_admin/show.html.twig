@@ -1,3 +1,4 @@
+{# Affichage vue detaillée d'une ue pour admin#}
 {% extends 'base.html.twig' %}
 {% block title %}Détails UE{% endblock %}
 
@@ -23,6 +24,7 @@
     {% endif %}
   </table>
 
+  {# Boutons modifier, supprimer et retour à la liste#}
   <a class="btn btn-primary" href="{{ path('app_u_e_admin_edit', {'id': u_e.id}) }}">
     Modifier
   </a>
@@ -35,6 +37,7 @@
   <hr>
   <h2>Ajouter un étudiant</h2>
   <div data-controller="ue-show">
+    {# Select des étudiants disponibles #}
     <div class="input-group mb-3">
       <select class="form-select" data-ue-show-target="select">
        <option value="" disabled selected hidden>Veuillez sélectionner un étudiant</option>
@@ -44,6 +47,7 @@
           </option>
         {% endfor %}
       </select>
+      {# Bouton pour déclencher l’action Stimulus #}
       <button
         class="btn btn-success"
         data-action="ue-show#addStudent"
@@ -52,6 +56,7 @@
       </button>
     </div>
 
+    {# Liste des étudiants inscrits #}
     <ul class="list-group" data-ue-show-target="list">
       {% for ins in u_e.inscriptions %}
         <li class="list-group-item" data-user-id="{{ ins.userId.id }}">
@@ -67,6 +72,7 @@
 
 {% block javascripts %}
   {{ parent() }}
+  {# Script Stimulus inline pour gérer l’ajout/suppression d’étudiants en AJAX #}
   <script type="module-shim">
     import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
     const application = Application.start();
@@ -114,6 +120,7 @@
 
     application.register('ue-show', UeShowController);
 
+    {# Gestion manuelle du bouton de suppression existant #}
     document.querySelectorAll('.remove-student-btn').forEach(button => {
   button.addEventListener('click', function () {
     const studentId = this.getAttribute('data-student-id');

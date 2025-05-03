@@ -1,10 +1,11 @@
+{# Page de création d'un nouvel utilisateur #}
 {% extends 'base.html.twig' %}
 
 {% block title %}New User{% endblock %}
 
 {% block body %}
     <h1>Create new User</h1>
-
+    {# On inclu le formulaire d'utilisateur : label,champs et bouton #}
     {{ include('user_admin/_form.html.twig') }}
 
     <a href="{{ path('app_admin_dashboard') }}">back to list</a>

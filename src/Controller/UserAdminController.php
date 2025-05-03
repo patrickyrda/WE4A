@@ -15,38 +15,46 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserAdminController extends AbstractController{
+    // Affiche la liste de tous les users
     #[Route('/user/admin', name: 'app_user_admin_index')]
     public function index(UserRepository $userRepository, Request $request): Response
     {   
+        // On recupere les utilisateurs dans la bdd
         $users = $userRepository->findAll();;
+        // On renvoie le fragment de la table HTML
         if ($request->isXmlHttpRequest()) {
             $html = $this->renderView('user_admin/_table.html.twig', [
                 'users' => $users,
             ]);
-    
+            
             return $this->json([
                 'success' => true,
                 'html'    => $html,
             ]);
         }
-    
+        // On renvoie la page complete si ce n'est pas une requete AJAX
         return $this->render('user_admin/index.html.twig', [
             'users' => $users,
         ]);
     }
 
+    // Traitement du formulaire de creation d'un utilisateur
     #[Route('user/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = new User();
+        // On crée et traite le formulaire
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-
+        // On verifie si le formulaire est soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
+            // On recupere le mot de passe
             $plainPassword = $form->get('plainPassword')->getData();
+            // On verifie si le mot de passe est vide, si oui on lui donne une valeur par defaut
             if (!$plainPassword) {
                 $plainPassword = 'password120';
             }
+            // On hash le mot de passe
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->persist($user);
             $entityManager->flush();
@@ -79,28 +87,31 @@ final class UserAdminController extends AbstractController{
         ]);
     }
 
+// On affiche les details d'un utilisateur
 #[Route('user/{id}', name: 'app_user_admin_show', methods: ['GET'])]
 public function show(User $user, Request $request): Response
 {
+    // On verifie si c'est une requete AJAX
     if ($request->isXmlHttpRequest()) {
+        // On renvoie le fragment HTML du modal
         return $this->json([
             'content' => $this->renderView('user_admin/show.html.twig', [
                 'user' => $user,
             ])
         ]);
     }
-
+    // On renvoie la page complete si ce n'est pas une requete AJAX
     return $this->render('user_admin/show.html.twig', [
         'user' => $user,
     ]);
 }
-
+    // Traitement du formulaire d'edition d'un utilisateur
     #[Route('user/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
+        // On crée et traite le formulaire
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             
             //TODO: Here have to check if a password was inserted, if not, don't change it, HAVE TO CHANGE THE FORM

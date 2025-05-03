@@ -3,6 +3,7 @@
 {% block title %}{{ ue.title }}{% endblock %}
 
 {% block body %}
+{# Conteneur avec Stimulus pour charger les participants #}
 <div class="container my-5" data-controller="ue-view">
   <a href="{{ path('app_user_dashboard') }}" class="btn btn-secondary mb-4">← Retour à Mes UE</a>
   <h1 class="mb-3">{{ ue.title }}</h1>
@@ -15,19 +16,23 @@
 
 {% block javascripts %}
   {{ parent() }}
+  {# Chargement de Stimulus #}
   <script type="module-shim">
 import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js'
 const application = Application.start()
-
+{# Définition du controller pour afficher les participants #}
 class UeViewController extends Controller {
   static targets = ['list']
 
   connect() {
+    {# On recupere l'id de l'ue injecté par twig #}
     this.ueId = '{{ ue.id }}'
     this.loadParticipants()
   }
 
+  {# Fonction pour charger les participants de l'ue #}
   loadParticipants() {
+    {# On fait une requete pour recuperer les participants #}
     fetch(`/user/api/ue_participants?ue_id=${this.ueId}`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
@@ -39,6 +44,7 @@ class UeViewController extends Controller {
           this.listTarget.innerHTML = '<li class="list-group-item">Aucun participant</li>'
           return
         }
+        {# Creation d'une ligne par participant #}
         data.forEach(u => {
           const li = document.createElement('li')
           li.classList.add('list-group-item')

@@ -1,15 +1,19 @@
+{# Page dashboard des utilisateurs #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Administration des utilisateurs{% endblock %}
 
 {% block body %}
+{# Conteneur avec controller Stimulus pour chargement dynamique #}
 <div class="container my-5" data-controller="admin-dashboard">
   <h1 class="mb-4">Gestion des utilisateurs</h1>
 
+  {# Bouton pour créer un nouvel utilisateur #}
   <a href="{{ path('app_user_admin_new') }}" class="btn btn-success mb-3">
     + Nouvel utilisateur
   </a>
 
+  {# Conteneur de la table des utilisateurs, mis à jour via AJAX #}
   <div id="user-table-container">
     {{ include('user_admin/_table.html.twig', { users: users }) }}
   </div>
@@ -20,9 +24,9 @@
   {{ parent() }}
   <script type="module">
     import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
-
     const application = Application.start();
 
+    {# Controller Stimulus pour recharger la table des utilisateurs en AJAX #}
     class AdminDashboardController extends Controller {
       connect() {
         this.loadUserTable();
@@ -35,6 +39,7 @@
         .then(r => r.json())
         .then(json => {
           if (json.success) {
+            {# Injection du fragment HTML retourné #}
             document
               .getElementById('user-table-container')
               .innerHTML = json.html;
@@ -43,7 +48,7 @@
         .catch(err => console.error('Erreur AJAX', err));
       }
     }
-
+    {# Enregistrement du controller sous le nom 'admin-dashboard' #}
     application.register('admin-dashboard', AdminDashboardController);
   </script>
 {% endblock %}

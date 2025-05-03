@@ -1,3 +1,4 @@
+{# Tableau de bord utilisateur #}
 {% extends 'base.html.twig' %}
 {% block title %}Mon Espace{% endblock %}
 
@@ -7,18 +8,23 @@
   <div class="rectangle">
     <h1>Bienvenue sur votre tableau de bord</h1>
 
+  {# Section des ue de l’utilisateur #}
   <section class="mt-5">
     <h2>Mes UE</h2>
     <div class="row">
+      {# Boucle sur les ue #}
       {% for ue in ues %}
         <div class="col-md-4 mb-4">
           <div class="card">
+            {# Affiche l’image de l'ue si disponible #}
             {% if ue.imagePath %}
               <img src="{{ ue.imagePath }}" class="card-img-top" alt="{{ ue.title }}">
             {% endif %}
             <div class="card-body d-flex flex-column">
+              {# Titre et code de l’UE #}
               <h5 class="card-title">{{ ue.title }}</h5>
               <p class="card-text text-muted">{{ ue.code }}</p>
+              {# Lien vers les détails de l’UE #}
               <a href="{{ path('app_u_e_dashboard_show', { id: ue.id }) }}" class="btn btn-outline-primary mt-auto">
                 Voir détails
               </a>
@@ -26,6 +32,7 @@
           </div>
         </div>
       {% else %}
+      {# Message si pas d'ue #}
         <div class="col-12">
           <p class="text-muted">Vous n'êtes inscrit à aucune UE.</p>
         </div>
@@ -33,10 +40,10 @@
     </div>
   </section>
 
-
-
+  {# Section des articles récents #}
   <section class="recent-posts">
   <h2 class="h4 mb-3">Articles récents</h2>
+  {# Conteneur où seront injectés les posts via js #}
   <div id="posts-list">
     <p class="text-muted">Chargement des articles...</p>
   </div>
@@ -45,24 +52,30 @@
 
 
 </div>
+
+{# Script ps pour charger dynamiquement les articles #}
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   const postsList = document.getElementById("posts-list");
 
   try {
+    {# On fait une requete vers l'api get_news, pour récuperer les informations #}
     const res = await fetch("/user/api/get_news");
     const data = await res.json();
 
+    {# Gestion des erruers de format ou de statut#}
     if (!data || data.status !== "success" || !Array.isArray(data.data)) {
       postsList.innerHTML = "<p class='text-danger'>Erreur lors du chargement des articles.</p>";
       return;
     }
 
+    {# Message afficher s'il n'y a pas d'article #}
     if (data.data.length === 0) {
       postsList.innerHTML = "<p class='text-muted'>Aucun article disponible.</p>";
       return;
     }
 
+    {# Construction de l'HTML des articles #}
     postsList.innerHTML = data.data.map(post => {
       const hasFile = post.file_path !== null;
       const nomFichier = hasFile ? post.file_path.split('/').pop() : '';
@@ -75,12 +88,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         <article class="card shadow-sm mb-3">
           <div class="card-body">
             ${hasFile ? `
+              {# Affichage d'un nouveau upload de fichier #}
               <p class="mb-1">
                 <strong>${post.name} ${post.surname}</strong>
                 a posté un nouveau fichier,
                 <strong>${nomFichier}</strong>,
                 dans <strong>${post.code}</strong>.
               </p>` : `
+              {# Affichage d'un nouveau message #}
               <p class="mb-1">
                 <strong>${post.name} ${post.surname}</strong>
                 a posté un nouveau message
@@ -94,6 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join('');
 
   } catch (err) {
+    {# Gestion des erreurs de requete #}
     console.error("Erreur lors du chargement des articles:", err);
     postsList.innerHTML = "<p class='text-danger'>Erreur lors du chargement des articles.</p>";
   }

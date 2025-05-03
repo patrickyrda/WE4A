@@ -21,10 +21,10 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 */
 #[Route('/post')]
 final class PostController extends AbstractController{
+    // Affiche la liste de tous les posts
     #[Route(name: 'app_post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository): Response
     {   
-        
         return $this->render('post/index.html.twig', [
             'posts' => $postRepository->findAll(),
         ]);
@@ -40,34 +40,39 @@ final class PostController extends AbstractController{
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository, SluggerInterface $slugger): Response
     {   
+        // On recupere l'utilisateur connecté ou on le redirige vers la page de login
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
+        // On recupere ue_id dans le parametre de la requete
         $ue_id = $request->query->get('ue_id');
         $ue  = $ueRepository->find($ue_id);
         if (!$ue) {
             throw $this->createNotFoundException('UE not found');
         }
 
+        // On cree l'entité POST et initialise ses attributs
         $post = new Post();
         $post->setUserId($user);
         $post->setUeId($ue);
         $post->setDate(new \DateTimeImmutable());
 
+        // Creation et traitement du formulaire Symfony
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // On recupere le fichier uploadé
             $uploadedFile = $form->get('file_path')->getData();
-
             if ($uploadedFile) {
+                // On genere le nom de fichier
                 $filename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($filename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
-
                 try
                 {
+                    // On deplace le fichier dans le repertoire de stockage
                     $uploadedFile->move(
                         $this->getParameter('uploads_directory'),
                         $newFilename
@@ -75,25 +80,22 @@ final class PostController extends AbstractController{
                 } catch (FileException $e) {
                     // Handle exception 
                 }
-
+                // On cree l'entité File et on l'associe au post
                 $file = new File();
                 $file->setFilePath($newFilename);
-
                 $post->addFile($file);
                 $entityManager->persist($file);
             }
-
             
             $entityManager->persist($post);
             $entityManager->flush();
-
             return $this->json([
-                
                 'success' => true,
                 'message' => 'Post created successfully'
             ]);
         }
 
+        // On retourne le formulaire à afficher dans le modal
         return $this->json([
             'success' => true,
             'form' => $this->renderView('post/_form.html.twig', [
@@ -102,8 +104,6 @@ final class PostController extends AbstractController{
             ])
         ]);
     }
-
-
     /*
     *
     *   This is the API responsible for handling the editing of a post.
@@ -120,21 +120,20 @@ final class PostController extends AbstractController{
 
         //handling of the form submission and file upload.
         if ($form->isSubmitted() && $form->isValid()) {
-            
+            // On recupere le fichier uploadé
             $uploadedFile = $form->get('file_path')->getData();
-
             if ($uploadedFile) {
+                // On supprime les anciens fichiers liés au post
                 foreach ($post->getFiles() as $existingFile) {    
                     $oldFilePath = $this->getParameter('uploads_directory').'/'.$existingFile->getFilePath();
-
                     if (file_exists($oldFilePath)) {
                         unlink($oldFilePath);
                     }
-
                     $post->removeFile($existingFile);
                     $entityManager->remove($existingFile);
                 }
-
+                
+                // On genere et deplace le nouveau fichier
                 $filename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeFilename = $slugger->slug($filename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
@@ -148,13 +147,14 @@ final class PostController extends AbstractController{
                     // Handle upload exception if needed
                 }
 
+                // On crée une nouvelle entité File
                 $file = new File();
                 $file->setFilePath($newFilename);
-
                 $post->addFile($file);
                 $entityManager->persist($file);
             }
 
+            // On le met à jour
             $entityManager->flush();
 
             return $this->json([
@@ -194,13 +194,16 @@ final class PostController extends AbstractController{
     #[Route('/download/{filename}', name: 'post_download_file', methods: ['GET'])]
     public function downloadFile(string $filename): Response
     {
+        // On crée le chemin vers le fichier
         $uploadsDir = $this->getParameter('uploads_directory');
         $filePath = $uploadsDir . '/' . $filename;
-
+        
+        // On verifie si le fichier existe
         if (!file_exists($filePath)) {
             throw $this->createNotFoundException('File not found.');
         }
 
+        // On verifie le type et renvoie le fichier
         $mimeType = mime_content_type($filePath);
         $originalFilename = pathinfo($filename, PATHINFO_BASENAME);
 

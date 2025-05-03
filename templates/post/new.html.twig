@@ -4,14 +4,17 @@
 {% block body %}
 <div class="container py-4">
   <h1 class="h4 mb-4">Créer un post</h1>
-
+  {# Boutons selection entre texte ou fichier #}
   <div class="btn-group mb-4" role="group" aria-label="Type de post">
     <button id="tab-text" type="button" class="btn btn-primary">Texte</button>
     <button id="tab-file" type="button" class="btn btn-outline-primary">Fichier</button>
   </div>
 
+  {# Formulaire avec action vers la route de création de post #}
+  }
   {{ form_start(form, { action: path('app_post_new', { ue_id: ue.id }) }) }}
 
+    {# Section messaage (texte) visible par défaut #}
     <div id="sect-text">
       {{ form_row(form.message, {
           attr: {
@@ -22,10 +25,12 @@
       }) }}
     </div>
 
+    {# Section upload #}
     <div id="sect-file" class="d-none">
       {{ form_row(form.file_path) }}
     </div>
 
+    {# Bouton de submit#}
     <button type="submit" class="btn btn-success">
       {{ button_label|default('Enregistrer') }}
     </button>
@@ -51,6 +56,7 @@
             fDiv = document.getElementById('sect-file'),
             textarea = document.querySelector('.auto-resize');
 
+      {# Fonction pour changer de section texte ou fichier #}
       function toggle(type) {
         const textMode = type === 'text';
         tDiv.classList.toggle('d-none', !textMode);
@@ -61,12 +67,13 @@
         fBtn.classList.toggle('btn-primary', !textMode);
         fBtn.classList.toggle('btn-outline-primary', textMode);
       }
-
+      {# Ajustement dynamique de la hauteur de la textarea #}
       function autoResize(el) {
         el.style.height = 'auto';
         el.style.height = el.scrollHeight + 'px';
       }
 
+      {# Ecouteurs d'evenements #}
       tBtn.addEventListener('click', () => toggle('text'));
       fBtn.addEventListener('click', () => toggle('file'));
       textarea.addEventListener('input', () => autoResize(textarea));
