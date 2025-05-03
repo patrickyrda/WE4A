@@ -18,7 +18,13 @@ use App\Entity\Inscriptions;
 use App\Repository\PostRepository;
 use App\Repository\UERepository;
 use App\Repository\UserRepository;
-
+/**
+ * 
+ *  This is the controller for the user dashboard, the "UEs choice page". It has all of the API endpoints for the user dashboard.
+ * TODO: Delete /user/api/ue_participants, Differenciate Students and Teachers in the UEs participants list [/ue/show/{id}, and get_participants]
+ * 
+ * 
+ */
 final class UEDashboardController extends AbstractController{
     #[Route('/user/dashboard', name: 'app_user_dashboard')]
     #[IsGranted('ROLE_USER')]
@@ -70,9 +76,11 @@ final class UEDashboardController extends AbstractController{
             'total_pages' => $totalPages,
         ]);
     }
-    /*
-    *   User has to be logged in for the Api to return something
-    *   In the js or html need to add a data-attribute with the ue_id that will be retrieved and then sent to the api/ueposts via GET 
+    /*  
+    *   This is the API responsible for fetching the UEs that the user is enrolled in.
+    *   It returns the UEs data in JSON format, so that they can be used in the frontend.
+    *   User has to be logged in for the Api to return something, otherwise it redirects to the login page.
+    *   This API end-point is not used in the current version of the website
     */
     #[Route('/user/api/fetch_ues', name: 'app_user_api_fetch_ues')]
     public function fetch_ues(Request $request, EntityManagerInterface $entityManager, JsonResponseService $jsonResponse): Response 
@@ -80,7 +88,6 @@ final class UEDashboardController extends AbstractController{
         $user = $this->getUser();
         
         if (!$user) {
-            //return $this->json(['error' => 'User not found'], Response::HTTP_UNAUTHORIZED);
             return $this->redirectToRoute('app_login');
         }
 
@@ -99,12 +106,13 @@ final class UEDashboardController extends AbstractController{
 
     }
 
-    #[Route('/user/api/ueposts', name: 'app_ue_posts', methods: ['GET'])]
-    /*
-    *   When sending a request to this endpoint, send the ue_id in a GET parameter. This ue_id should be stored somewhere so it can be used later in the Post creation/modification. TODO:
-    *   After retrieving the data use AJAX to load the posts and create a new route and template or 
-    *   use this route to automatically load  the posts in a page. In this case USE THE COMMENTED CODE and delete everything below
+    /*  
+    *   This is the API responsible for fetching the posts of a specific UE.
+    *   It returns the posts data in JSON format, so that they can be used in the frontend.
+    *   When sending a request to this endpoint, send the ue_id in a GET parameter. 
+    *   This endpoint uses our custom JsonResponseService to return the data in a consistent format.
     */
+    #[Route('/user/api/ueposts', name: 'app_ue_posts', methods: ['GET'])]
     public function ueposts(PostRepository $postRepository, Request $request, JsonResponseService $jsonResponse): Response
     {
 
@@ -114,11 +122,6 @@ final class UEDashboardController extends AbstractController{
         }
 
         $posts = $postRepository->findBy(['ue_id' => $ue_id]);
-
-        /* This code in case wanting to load the posts in a new page, not using AJAX
-        return $this->render("desired/route/of/the/template.html.twig", [
-            'posts' => $posts,
-        ]);*/
 
         if (!$posts) {
             return $jsonResponse->success([], 'UE does not have posts yet');
@@ -143,6 +146,13 @@ final class UEDashboardController extends AbstractController{
         return $jsonResponse->success($data, 'Fetched UEs posts successfully');
     }
 
+    /**
+     * 
+     *  This is the API responsible for adding a student to an UE.
+     *  It expects a JSON payload with the ue_id and student_id.
+     *  After adding the student, it returns a JSON response with the success status and a message.
+     * 
+     */
     #[Route('/user/api/add_student', name: 'user_api_add_student', methods: ['POST'])]
     public function ajouterEtudiant(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -177,14 +187,15 @@ final class UEDashboardController extends AbstractController{
         }
             return new JsonResponse(['success'=>true,'message'=>'Étudiant ajouté'], 200);
     }
-
+    /**
+     * 
+     *  This is the API responsible for removing a student from an UE.
+     *  It expects a JSON payload with the ue_id and student_id.
+     *  After adding the student, it returns a JSON response with the success status and a message.
+     * 
+     */
     #[Route('/user/api/supprimer-etudiant', name: 'supprimer_etudiant', methods: ['POST'])]
-    public function supprimerEtudiant(
-        Request $request,
-        UeRepository $ueRepository,
-        UserRepository $userRepository,
-        EntityManagerInterface $em
-    ): JsonResponse {
+    public function supprimerEtudiant(Request $request,UeRepository $ueRepository,UserRepository $userRepository,EntityManagerInterface $em): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
@@ -209,7 +220,14 @@ final class UEDashboardController extends AbstractController{
         return new JsonResponse(['success'=>true,'message'=>'Étudiant removed'], 200);
     }
 
-
+    /**
+     * 
+     *  This is the API responsible for fetching the 15 most recent posts of the user's assigned UEs.
+     *  It returns the posts data in JSON format, so that they can be used in the frontend.
+     *  This endpoint uses our custom JsonResponseService to return the data in a consistent format.
+     *  User has to be logged in for the Api to return something, otherwise it redirects to the login page.
+     *  It returns the data in a JSON format, so that it can be used in the frontend. It is retrieved by the frontend using AJAX.
+     */
     #[Route('/user/api/get_news', name: 'user_api_get_news')]
     public function getNews(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse) : Response 
     {
@@ -220,6 +238,7 @@ final class UEDashboardController extends AbstractController{
 
         $conn = $entityManager->getConnection();
 
+        //This is the code's biggest query, it fetches data from three tables, using all of the tables of the database.
         $query = 'SELECT f.file_path, us.name, us.surname, us.email, u.code, p.message, p.date
         FROM post p
         INNER JOIN ue u ON p.ue_id_id = u.id 
@@ -237,7 +256,13 @@ final class UEDashboardController extends AbstractController{
 
         return $jsonResponse->success($newposts, 'Fetched most recent posts successfully');
     }
-
+    /**
+     * 
+     *  This is the API responsible for fetching the participants of a specific UE.
+     *  It returns the participants data in JSON format, so that they can be used in the frontend.
+     *  When sending a request to this endpoint, send the ue_id in a GET parameter. 
+     *  This endpoint uses our custom JsonResponseService to return the data in a consistent format.
+     */
     #[Route('/user/api/get_participants', name: 'user_api_get_participants')]
     public function getParticipants(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse, Request $request) : Response 
     {   
@@ -284,6 +309,11 @@ final class UEDashboardController extends AbstractController{
 
         return $this->json($data);
     }
+
+    /**
+     * 
+     *  This is the route responsible for rendering the page of an UE. It sends data of the UE, its posts and the list of students that are enrolled in the UE.
+     */
     #[Route('/ue/show/{id}', name: 'app_u_e_dashboard_show')]
     public function show(UE $ue, UserRepository $userRepository, PostRepository $postRepo): Response
     {

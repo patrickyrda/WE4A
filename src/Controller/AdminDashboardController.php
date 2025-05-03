@@ -6,7 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-
+/*
+* This controller is responsible for rendering the admin dashboard page.
+*/
 final class AdminDashboardController extends AbstractController{
     #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
     public function index(): Response
