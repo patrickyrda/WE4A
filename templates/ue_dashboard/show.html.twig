@@ -55,7 +55,6 @@
     </table>
   </div>
 
-<<<<<<< HEAD
   <div id="students-section" class="mt-4">
     <h5>Étudiants</h5>
     <table class="table table-striped">
@@ -74,9 +73,7 @@
   </div>
 </div>
 
-=======
-  {# Section affichant tous les posts de l’UE #}
->>>>>>> origin/definitivebranch
+
   <section class="mt-5">
     <a class="btn btn-secondary mt-4"
      href="{{ path('app_user_dashboard') }}">
@@ -102,11 +99,9 @@
 {% include 'ue_dashboard/editmodal.html.twig' %}
 <script></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<<<<<<< HEAD
 
-=======
-{# Sciprt principal pour l'ouverture, submit et edit du post #}
->>>>>>> origin/definitivebranch
+
+
 <script>
 //Handle participants list data
 document.addEventListener('DOMContentLoaded', () => {
@@ -204,12 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(error => console.error('Error fetching form:', error));
   });
-<<<<<<< HEAD
+
 
   //Event listener for the modal of saving a post
-=======
-  {# Submit du formulaire de création de post #}
->>>>>>> origin/definitivebranch
+
   document.getElementById('savePost').addEventListener('click', function () {
   const form = document.querySelector('#modalContent form');
   const formData = new FormData(form);
