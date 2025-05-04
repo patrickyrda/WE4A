@@ -1,9 +1,9 @@
-<form method="post"
+<form 
+      method="post"
       action="{{ path('app_post_delete', { id: post.id }) }}"
-      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette UE ?');"
-      class="d-inline delete-form"
+      class="ajax-delete-form-post"
       data-post-id="{{ post.id }}"
-      data-action="post#askDelete">
+      >
 
   <input type="hidden"
          name="_token"

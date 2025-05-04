@@ -21,13 +21,10 @@ use App\Repository\UserRepository;
 /**
  * 
  *  This is the controller for the user dashboard, the "UEs choice page". It has all of the API endpoints for the user dashboard.
- * TODO: Delete /user/api/ue_participants, Differenciate Students and Teachers in the UEs participants list [/ue/show/{id}, and get_participants]
- * 
  * 
  */
 final class UEDashboardController extends AbstractController{
     #[Route('/user/dashboard', name: 'app_user_dashboard')]
-    #[IsGranted('ROLE_USER')]
     public function index(
         Request $request,
         UERepository $ueRepository,
@@ -38,6 +35,7 @@ final class UEDashboardController extends AbstractController{
         if (!$utilisateur) {
             return $this->redirectToRoute('app_login');
         }
+        
         $limit = 5;
         $inscriptions = $utilisateur->getInscriptions();
         $ues = $inscriptions
@@ -81,6 +79,7 @@ final class UEDashboardController extends AbstractController{
     *   It returns the UEs data in JSON format, so that they can be used in the frontend.
     *   User has to be logged in for the Api to return something, otherwise it redirects to the login page.
     *   This API end-point is not used in the current version of the website
+
     */
     #[Route('/user/api/fetch_ues', name: 'app_user_api_fetch_ues')]
     public function fetch_ues(Request $request, EntityManagerInterface $entityManager, JsonResponseService $jsonResponse): Response 
@@ -272,44 +271,56 @@ final class UEDashboardController extends AbstractController{
         }
 
         $conn = $entityManager->getConnection();
-        $query = 'SELECT u.name, u.surname, u.email FROM user u INNER JOIN inscriptions i ON u.id = i.user_id_id WHERE i.ue_id_id = :ue_id;';
+        $query = '
+            SELECT u.name, u.surname, u.email, 
+            JSON_CONTAINS(u.roles, :studentRole) AS is_student,
+            JSON_CONTAINS(u.roles, :teacherRole) AS is_teacher
+            FROM user u 
+            INNER JOIN inscriptions i ON u.id = i.user_id_id 
+            WHERE i.ue_id_id = :ue_id;
+        ';
+
         $stmt = $conn->prepare($query);
-        $result = $stmt->executeQuery(['ue_id' => $ue_id]);
+        $result = $stmt->executeQuery([
+            'ue_id' => $ue_id,
+            'studentRole' => json_encode('ROLE_STUDENT'),
+            'teacherRole' => json_encode('ROLE_TEACHER')
+        ]);
+
         $participants = $result->fetchAllAssociative();
 
         if (!$participants) {
             return $jsonResponse->success([], 'UE does not have participants yet');
         }
 
-        return $jsonResponse->success($participants, 'Fetched participants successfully');
+        $participants_filtered = [
+            'students' => [],
+            'teachers' => []
+        ];
+
+        foreach ($participants as $participant) {
+            
+            if ($participant['is_student']) {
+                $participants_filtered['students'][] = [
+                    'name' => $participant['name'],
+                    'surname' => $participant['surname'],
+                    'email' => $participant['email']
+                ];
+            }
+
+            if ($participant['is_teacher']) {
+                $participants_filtered['teachers'][] = [
+                    'name' => $participant['name'],
+                    'surname' => $participant['surname'],
+                    'email' => $participant['email']
+                ];
+            }    
+        }
+        
+
+        return $jsonResponse->success($participants_filtered, 'Fetched participants successfully');
     }
-    #[Route('/user/api/ue_participants', name: 'app_user_api_ue_participants', methods: ['GET'])]
-    public function fetchParticipants(Request $request, UERepository $ueRepository): JsonResponse
-    {
-        $ueId = $request->query->getInt('ue_id');
-        if (!$ueId) {
-            return $this->json(['error' => 'ue_id manquant'], 400);
-        }
-
-        $ue = $ueRepository->find($ueId);
-        if (!$ue) {
-            return $this->json(['error' => 'UE introuvable'], 404);
-        }
-
-        $data = [];
-        foreach ($ue->getInscriptions() as $inscription) {
-            $user = $inscription->getUserId();
-            $data[] = [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'surname' => $user->getSurname(),
-                'roles' => $user->getRoles(),
-            ];
-        }
-
-        return $this->json($data);
-    }
-
+    
     /**
      * 
      *  This is the route responsible for rendering the page of an UE. It sends data of the UE, its posts and the list of students that are enrolled in the UE.

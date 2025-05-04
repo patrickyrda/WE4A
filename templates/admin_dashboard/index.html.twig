@@ -335,6 +335,68 @@ document.addEventListener('click', function (event) {
     .catch(error => console.error('Error submitting edited UE form:', error));
   }
 });
+
+//Handle UE deletion 
+document.addEventListener('submit', function (event) {
+  const form = event.target.closest('.ajax-delete-form-ue');
+  if (form) {
+    event.preventDefault();
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet ue ?')) return;
+
+    const formData = new FormData(form);
+    const actionUrl = form.getAttribute('action');
+
+    fetch(actionUrl, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const row = form.closest('tr');
+        if (row) row.remove();
+      } else {
+        console.error('Erreur lors de la suppression.');
+      }
+    })
+    .catch(error => console.error('Erreur AJAX:', error));
+  }
+});
+
+//Handle User deletion
+document.addEventListener('submit', function (event) {
+  const form = event.target.closest('.ajax-delete-form-user');
+  if (form) {
+    event.preventDefault();
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
+
+    const formData = new FormData(form);
+    const actionUrl = form.getAttribute('action');
+
+    fetch(actionUrl, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const row = form.closest('tr');
+        if (row) row.remove();
+      } else {
+        console.error('Erreur lors de la suppression.');
+      }
+    })
+    .catch(error => console.error('Erreur AJAX:', error));
+  }
+});
   </script>
   
 {% endblock %}

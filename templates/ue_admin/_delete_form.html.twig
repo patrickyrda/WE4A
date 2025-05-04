@@ -1,8 +1,8 @@
 <form
     method="post"
     action="{{ path('app_u_e_admin_delete', {'id': ue.id}) }}"
-    onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette UE ?');"
-    style="display:inline"
+    class="ajax-delete-form-ue"
+    data-ue-id="{{ ue.id }}"
 >
     <input
         type="hidden"

@@ -6,6 +6,7 @@ use App\Repository\FileRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FileRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class File
 {
     #[ORM\Id]
@@ -47,5 +48,18 @@ class File
         $this->file_path = $file_path;
 
         return $this;
+    }
+
+    //Deletes the file from the disk when the entity is removed
+    #[ORM\PreRemove]
+    public function deleteFileFromDisk(): void
+    {
+        
+        $uploadDir = __DIR__ . '/../../public/uploads';
+        $filePath = $uploadDir . '/' . basename($this->file_path);
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
     }
 }

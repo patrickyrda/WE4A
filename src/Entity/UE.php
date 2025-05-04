@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UERepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class UE
 {
     #[ORM\Id]
@@ -159,4 +160,22 @@ class UE
         }
         return $this;
     }
+
+    #[ORM\PreRemove]
+    // Deletes the image from the disk when the entity is removed
+    public function deleteImageFromDisk(): void
+    {
+        $defaultImage = 'uploads/ue_images/default.jpg'; 
+
+        if ($this->image_path && $this->image_path !== $defaultImage) {
+            
+            $uploadDir = __DIR__ . '/../../public/uploads/ue_images';
+            $filePath = $uploadDir . '/' . basename($this->image_path);
+            
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+    }
 }
+

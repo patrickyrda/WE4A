@@ -23,7 +23,7 @@
         <td>{{ ue.title }}</td>
         <td>
           {% if ue.imagePath %}
-            <img src="{{ ue.imagePath }}" alt="{{ ue.title }}" style="height:40px">
+            <img src="{{ asset(ue.imagePath) }}" alt="{{ ue.title }}" style="height:40px">
           {% endif %}
         </td>
         <td>

@@ -34,6 +34,8 @@
     Afficher les participants
   </button>
   <div class="collapse" id="participants">
+  <div id="teachers-section">
+    <h5>Enseignants</h5>
     <table class="table table-striped">
       <thead>
         <tr>
@@ -41,20 +43,31 @@
           <th>Prénom</th>
         </tr>
       </thead>
-      <tbody>
-        {% for ins in u_e.inscriptions %}
-          <tr>
-            <td>{{ ins.userId.name }}</td>
-            <td>{{ ins.userId.surname }}</td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="2" class="text-center text-muted">Aucun étudiant.</td>
-          </tr>
-        {% endfor %}
+      <tbody id="teachers-table-body">
+        <tr>
+          <td colspan="2" class="text-center text-muted">Chargement...</td>
+        </tr>
       </tbody>
     </table>
   </div>
+
+  <div id="students-section" class="mt-4">
+    <h5>Étudiants</h5>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+        </tr>
+      </thead>
+      <tbody id="students-table-body">
+        <tr>
+          <td colspan="2" class="text-center text-muted">Chargement...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
   <section class="mt-5">
     <a class="btn btn-secondary mt-4"
@@ -78,7 +91,76 @@
 {% include 'ue_dashboard/editmodal.html.twig' %}
 <script></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 <script>
+//Handle participants list data
+document.addEventListener('DOMContentLoaded', () => {
+  const ueId = '{{ u_e.id }}'; // assuming this Twig variable gives the UE ID
+  const apiUrl = `/user/api/get_participants?ue_id=${ueId}`;
+  console.log("Fetching users");
+
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.status !== "success") {
+        console.error("API error:", data.message);
+        return;
+      }
+
+      const teachersBody = document.getElementById('teachers-table-body');
+      const studentsBody = document.getElementById('students-table-body');
+
+      // Clear loading rows
+      teachersBody.innerHTML = '';
+      studentsBody.innerHTML = '';
+
+      const { teachers, students } = data.data;
+
+      if (teachers.length === 0) {
+        teachersBody.innerHTML = `
+          <tr>
+            <td colspan="2" class="text-center text-muted">Aucun enseignant.</td>
+          </tr>
+        `;
+      } else {
+        teachers.forEach(t => {
+          teachersBody.innerHTML += `
+            <tr>
+              <td>${t.name}</td>
+              <td>${t.surname}</td>
+            </tr>
+          `;
+        });
+      }
+
+      if (students.length === 0) {
+        studentsBody.innerHTML = `
+          <tr>
+            <td colspan="2" class="text-center text-muted">Aucun étudiant.</td>
+          </tr>
+        `;
+      } else {
+        students.forEach(s => {
+          studentsBody.innerHTML += `
+            <tr>
+              <td>${s.name}</td>
+              <td>${s.surname}</td>
+            </tr>
+          `;
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Fetch failed:", error);
+    });
+});
+</script>
+
+
+
+<script>
+  
+  //Event listener for creating a post
   document.getElementById('create-post-btn').addEventListener('click', function(e) {
     e.preventDefault();
     console.log("Button create post clicked");
@@ -108,6 +190,7 @@
       .catch(error => console.error('Error fetching form:', error));
   });
 
+  //Event listener for the modal of saving a post
   document.getElementById('savePost').addEventListener('click', function () {
   const form = document.querySelector('#modalContent form');
   const formData = new FormData(form);
@@ -143,6 +226,7 @@
 
 let currentPostId = 0;
 
+//Event listener for modifying a post
 function addModifierButtonListener() {
 
     const buttons = document.querySelectorAll('.modifier-buttons');
@@ -179,6 +263,7 @@ function addModifierButtonListener() {
     });
   }
 
+  //Evenet listener on the button to save a post
   document.getElementById('modifyPost').addEventListener('click', function () {
   const form = document.querySelector('#modalContentEdit form');
   const formData = new FormData(form);
@@ -213,5 +298,36 @@ function addModifierButtonListener() {
 });
 
   document.addEventListener('DOMContentLoaded', addModifierButtonListener);
+
+//Handle Post deletion
+document.addEventListener('submit', function (event) {
+  const form = event.target.closest('.ajax-delete-form-post');
+  if (form) {
+    event.preventDefault();
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) return;
+
+    const formData = new FormData(form);
+    const actionUrl = form.getAttribute('action');
+
+    fetch(actionUrl, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+        if (row) row.remove();
+      } else {
+        console.error('Erreur lors de la suppression.');
+      }
+    })
+    .catch(error => console.error('Erreur AJAX:', error));
+  }
+});
 </script>
 {% endblock %}

@@ -9,6 +9,9 @@ use Symfony\Component\Routing\Attribute\Route;
 /*
 * This controller is responsible for rendering the admin dashboard page.
 */
+
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+#[IsGranted('ROLE_ADMIN')]
 final class AdminDashboardController extends AbstractController{
     #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
     public function index(): Response
