@@ -37,10 +37,11 @@ final class UEDashboardController extends AbstractController{
         // On recupere l'utilisateur connecté ou on le redirige vers la page de login
         $utilisateur = $this->getUser();
         if (!$utilisateur) {
+            // Redirection vers login si non connecté
             return $this->redirectToRoute('app_login');
         }
         // On defini la limite de posts par page et calcul le nombre total de pages
-        $limit = 5;
+        $limit = 5; // Nombre de posts par page
         $inscriptions = $utilisateur->getInscriptions();
         $ues = $inscriptions
             ->map(fn($insc) => $insc->getUeId())
@@ -204,24 +205,29 @@ final class UEDashboardController extends AbstractController{
      */
     #[Route('/user/api/supprimer-etudiant', name: 'supprimer_etudiant', methods: ['POST'])]
     public function supprimerEtudiant(Request $request,UeRepository $ueRepository,UserRepository $userRepository,EntityManagerInterface $em): JsonResponse {
+        // Decodage du contenu JSON de la requete
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
+            // Renvoie une erreur si le JSON est invalide
             return new JsonResponse(['error' => 'Invalid JSON data'], 400);
         }
         
+        // On verifie les parametres necessaires
         $ue_id = $data['ue_id'] ?? null;
         $user_id = $data['user_id'] ?? null;
         if (!$ue_id || !$user_id) {
             return $this->json(['erreur' => 'ue_id ou user_id manquant'], 400);
         }
 
+        // On recupere les us et user depuis la bdd
         $ue = $ueRepository->find($ue_id);
         $etudiant = $userRepository->find($user_id);
         if (!$ue || !$etudiant) {
             return $this->json(['erreur' => 'UE ou étudiant introuvable'], 404);
         }
 
+        // Suppression de l'etudiant de l'ue
         $ue->removeStudent($etudiant);
         $em->flush();
 
@@ -239,6 +245,7 @@ final class UEDashboardController extends AbstractController{
     #[Route('/user/api/get_news', name: 'user_api_get_news')]
     public function getNews(EntityManagerInterface $entityManager, JsonResponseService $jsonResponse) : Response 
     {
+        // Verfication connexion utilisateur
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
@@ -331,14 +338,17 @@ final class UEDashboardController extends AbstractController{
     #[Route('/ue/show/{id}', name: 'app_u_e_dashboard_show')]
     public function show(UE $ue, UserRepository $userRepository, PostRepository $postRepo): Response
     {
+        // Recuperation des posts de l'ue triés par date descroissante
         $posts = $postRepo->findBy(
             ['ue_id' => $ue],
             ['date'  => 'DESC']
         );
+        // Filtre pour conserver les étudiants uniquement
         $etudiants = array_filter(
             $userRepository->findAll(),
             fn(User $u) => in_array('ROLE_STUDENT', $u->getRoles(), true)
         );
+        // Rendu du template avec les données necessaires
         return $this->render('ue_dashboard/show.html.twig', [
             'u_e'     => $ue,
             'posts'   => $posts,

@@ -1,4 +1,3 @@
-{# templates/post/edit.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}Modifier un post{% endblock %}
@@ -7,13 +6,13 @@
 <div class="container py-4">
   <h1 class="h4 mb-4">Modifier le post</h1>
 
-  {# Onglets Bootstrap #}
+  {# Onglets Bootstrap pour selection mode texte ou fichier#}
   <div class="btn-group mb-4" role="group" aria-label="Type de post">
     <button id="tab-text" type="button" class="btn btn-primary">Texte</button>
     <button id="tab-file" type="button" class="btn btn-outline-primary">Fichier</button>
   </div>
 
-  {# Formulaire d’édition #}
+  {# Formulaire d’édition, cible l'action de modification avec l'id du post #}
   {{ form_start(form, { action: path('app_post_edit', { id: post.id }) }) }}
 
     {# Section texte #}
@@ -27,7 +26,7 @@
       }) }}
     </div>
 
-    {# Section fichier, avec liste des fichiers existants #}
+    {# Section fichier, avec liste des fichiers existants, masquée par défaut #}
     <div id="sect-file" class="d-none">
       {% if post.files|length > 0 %}
         <ul class="mb-3">
@@ -43,12 +42,14 @@
       {{ form_row(form.file_path) }}
     </div>
 
+    {# Bouton validation du formulaire #}
     <button type="submit" class="btn btn-success">
       Mettre à jour
     </button>
 
   {{ form_end(form) }}
 
+  {# Lien de retour vers la vue de l'ue associée #}
   <p class="mt-3">
     <a href="{{ path('app_u_e_dashboard_show', { id: post.ueId.id }) }}"
        class="btn btn-outline-primary">
@@ -77,7 +78,7 @@
         const isText = type === 'text';
         tDiv.classList.toggle('d-none', !isText);
         fDiv.classList.toggle('d-none',  isText);
-        
+        {# On met à jour les styles des onglets #}
         tBtn.classList.toggle('btn-primary',         isText);
         tBtn.classList.toggle('btn-outline-primary', !isText);
         fBtn.classList.toggle('btn-primary',         !isText);

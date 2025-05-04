@@ -3,13 +3,14 @@
 {% block title %}Modifier UE{% endblock %}
 
 {% block body %}
+
   <h1>Modifier l’UE {{ ue.title }}</h1>
 
   {# Affichage de l’image actuelle #}
   {% if ue.imagePath %}
     <img src="{{ ue.imagePath }}" alt="{{ ue.title }}" class="img-thumbnail mb-3" style="max-height:150px">
   {% endif %}
-
+  {# Formulaire Symfony, genere <form> avec les attributs #}
   {{ form_start(form) }}
     {{ form_row(form.code) }}
     {{ form_row(form.title) }}
