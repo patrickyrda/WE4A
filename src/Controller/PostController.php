@@ -20,10 +20,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
     
 
 */
-#[IsGranted('ROLE_TEACHER')]
+
 #[Route('/post')]
 final class PostController extends AbstractController{
     // Affiche la liste de tous les posts
+    #[IsGranted('ROLE_ADMIN')]
     #[Route(name: 'app_post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository): Response
     {   
@@ -39,6 +40,7 @@ final class PostController extends AbstractController{
     *   User has to be logged in in order for the route to properly work. User is redirected to the login page if not logged in.
     *
     */
+    #[IsGranted('ROLE_TEACHER')]
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UERepository $ueRepository, SluggerInterface $slugger): Response
     {   
@@ -114,6 +116,7 @@ final class PostController extends AbstractController{
     *   With POST method, it handles the form submission and file upload.
     *   It expects a Post id int the GET request. It uses Symfony's ParamConverter to automatically convert the id to a Post entity.
     */ 
+    #[IsGranted('ROLE_TEACHER')]
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
@@ -178,6 +181,7 @@ final class PostController extends AbstractController{
     /*
     *   This is the API responsible for handling the deletion of a post. 
     */
+    #[IsGranted('ROLE_TEACHER')]
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
@@ -195,6 +199,7 @@ final class PostController extends AbstractController{
     *   This is the API responsible for handling the file download.
     *   It expects a filename in the URL and returns the file as a response.
     */
+    #[IsGranted('ROLE_USER')]
     #[Route('/download/{filename}', name: 'post_download_file', methods: ['GET'])]
     public function downloadFile(string $filename): Response
     {
