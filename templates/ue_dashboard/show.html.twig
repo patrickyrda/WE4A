@@ -45,6 +45,7 @@
         <tr>
           <th>Nom</th>
           <th>Prénom</th>
+          <th>Email</th>
         </tr>
       </thead>
       <tbody id="teachers-table-body">
@@ -62,6 +63,7 @@
         <tr>
           <th>Nom</th>
           <th>Prénom</th>
+          <th>Email</th>
         </tr>
       </thead>
       <tbody id="students-table-body">
@@ -138,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
               <td>${t.name}</td>
               <td>${t.surname}</td>
+              <td><a href="mailto:${t.email}">${t.email}</a></td>
             </tr>
           `;
         });
@@ -155,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
               <td>${s.name}</td>
               <td>${s.surname}</td>
+              <td><a href="mailto:${s.email}">${s.email}</a></td>
             </tr>
           `;
         });

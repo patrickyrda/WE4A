@@ -30,7 +30,12 @@
                 <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
 
                 <label for="password">Password</label>
-                <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                <div style="position: relative;">
+                    <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
+                    <button type="button" id="togglePassword" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); border:none; background:none; cursor:pointer;">
+                        👁️
+                    </button>
+                </div>
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
@@ -51,6 +56,17 @@
 
         </div>
     </div>
+
+    <script>
+    const togglePassword = document.querySelector("#togglePassword");
+    const passwordInput = document.querySelector("#password");
+
+    togglePassword.addEventListener("click", function () {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁️" : "🙈";
+    });
+</script>
 {% endblock %}
 </body>
 </html>

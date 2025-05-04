@@ -29,25 +29,42 @@ final class UserAdminController extends AbstractController{
      */
 
     #[Route('/user/admin', name: 'app_user_admin_index')]
-    public function index(UserRepository $userRepository, Request $request): Response
+    public function index(UserRepository $userRepository, Request $request, EntityManagerInterface $entityManager): Response
     {   
         // On recupere les utilisateurs dans la bdd
         $users = $userRepository->findAll();;
-        // On renvoie le fragment de la table HTML
-        if ($request->isXmlHttpRequest()) {
-            $html = $this->renderView('user_admin/_table.html.twig', [
-                'users' => $users,
-            ]);
-            
-            return $this->json([
-                'success' => true,
-                'html'    => $html,
-            ]);
+
+        $usersWithUEs = [];
+
+        foreach($users as $user) {
+            $connection = $entityManager->getConnection();
+            $sql = '
+                SELECT u.code FROM ue u 
+                INNER JOIN inscriptions i on i.ue_id_id = u.id 
+                INNER JOIN user us ON i.user_id_id = us.id 
+                WHERE us.id = :userId;
+            ';
+            $stmt = $connection->prepare($sql);
+            $resultSet = $stmt->executeQuery(['userId' => $user->getId()]);
+            $ueCodes = $resultSet->fetchFirstColumn(); // Get only the list of 'code'
+    
+            $usersWithUEs[] = [
+                'entity' => $user,
+                'ueCodes' => $ueCodes,
+            ];
         }
-        // On renvoie la page complete si ce n'est pas une requete AJAX
-        return $this->render('user_admin/index.html.twig', [
-            'users' => $users,
+        // On renvoie le fragment de la table HTML
+        
+        $html = $this->renderView('user_admin/_table.html.twig', [
+           'users' => $usersWithUEs,
         ]);
+            
+        return $this->json([
+            'success' => true,
+            'html'    => $html,
+        ]);
+        
+        
     }
 
 

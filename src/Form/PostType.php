@@ -16,7 +16,7 @@ class PostType extends AbstractType
         $builder
             ->add('message')
             ->add('file_path', SymfonyFileType::class, [
-                'label' => 'Upload File',
+                'label' => 'Rajouter un fichier, si souhaité',
                 'mapped' => false, // important: on gère l'upload manuellement
                 'required' => false,
             ]);

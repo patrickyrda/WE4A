@@ -1,12 +1,20 @@
 {# Page d'edition du compte utilisateur #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}Modifier votre profil{% endblock %}
 
 {% block body %}
-    <h1>Editer votre compte</h1>
+    <h1>Modifier votre compte</h1>
 
+    <div class="register-container">
+   <div class="rectangle rectangle1">
+   
+     <h1>Editer votre compte</h1>
+     <div class="register-form">
     {# On inclu le formulaire pour modifier#}
     {{ include('user_management/_form.html.twig', {'button_label': 'Update'}) }}
+    </div>
+    </div>
+    </div>
 
 {% endblock %}

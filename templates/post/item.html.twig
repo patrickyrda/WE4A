@@ -12,10 +12,9 @@
       {% if isFile %}
         Partage de fichier :
         {% set fileName = post.files|first.filePath|split('/')|last %}
-        {# TODO:::::::::::: ADD ICON HERE #}
-        <a class="text-primary text-decoration-underline"
+        <a  class="text-primary text-decoration-underline d-inline-flex align-items-center"
           href="{{ path('post_download_file', { filename: fileName }) }}">
-          {{ fileName }}
+          <i class="bi bi-download me-1"></i>{{ fileName }}
         </a>
       {% endif %}
         Message :

@@ -15,32 +15,34 @@
       <th>Roles</th>
       <th>Prénom</th>
       <th>Nom</th>
+      <th>UE Codes</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
     {% for user in users %}
       <tr>
-        <td>{{ user.email }}</td>
-        <td>{{ user.roles|join(', ') }}</td>
-        <td>{{ user.name }}</td>
-        <td>{{ user.surname }}</td>
+        <td>{{ user.entity.email }}</td>
+        <td>{{ user.entity.roles|join(', ') }}</td>
+        <td>{{ user.entity.name }}</td>
+        <td>{{ user.entity.surname }}</td>
+        <td>{{ user.ueCodes|join(', ') }}</td>
         <td>
           <a class="btn btn-sm btn-info show-button-user"
-             href="{{ path('app_user_admin_show', { id: user.id }) }}">
+             href="{{ path('app_user_admin_show', { id: user.entity.id }) }}">
             Voir
           </a>
           <a class="btn btn-sm btn-primary edit-button-user"
-             href=#
-             data-user-id = "{{ user.id }}">
+             href="#"
+             data-user-id="{{ user.entity.id }}">
             Modifier
           </a>
-          {{ include('user_admin/_delete_form.html.twig', { user: user }) }}
+          {{ include('user_admin/_delete_form.html.twig', { user: user.entity }) }}
         </td>
       </tr>
     {% else %}
       <tr>
-        <td colspan="5" class="text-center">Aucun utilisateur</td>
+        <td colspan="6" class="text-center">Aucun utilisateur</td>
       </tr>
     {% endfor %}
   </tbody>
