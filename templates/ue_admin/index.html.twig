@@ -2,6 +2,7 @@
 {% block title %}Administration des UE{% endblock %}
 
 {% block body %}
+  {# Conteneur pour la table des ue, rempli dynamiquement #}
   <div id="ue-table-container">
     {{ include('ue_admin/_table.html.twig', {ues: u_es}) }}
   </div>
@@ -12,11 +13,12 @@
   <script type="module">
     import { Application, Controller } from 'https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/dist/stimulus.js';
     const application = Application.start();
+    {# Controller Stimulus pour charger dynamiquement la table des UE#}
     class AdminDashboardController extends Controller {
       connect() {
         this.loadUeTable();
       }
-
+      {# Fonction pour charger la table des UE #}
       loadUeTable() {
         fetch('{{ path('app_u_e_admin_index') }}', {
           headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -24,6 +26,7 @@
           .then(r => r.json())
           .then(json => {
             if (json.success) {
+              {# Injection du HTMl dans le conteneur #}
               document
                 .getElementById('ue-table-container')
                 .innerHTML = json.html;
@@ -32,7 +35,7 @@
           .catch(e => console.error('Erreur AJAX', e));
       }
     }
-
+    {# Enregistrement du controller #}
     application.register('admin-dashboard', AdminDashboardController);
   </script>
 {% endblock %}

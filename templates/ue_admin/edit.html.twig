@@ -2,6 +2,7 @@
 {% block title %}Modifier UE{% endblock %}
 {% block body %}
   <h1>Modifier l’UE</h1>
+  {# Inclusion du formulaire de modification via le partial _form.html.twig #}
   {{ include('ue_admin/_form.html.twig', {
       form: form,
       button_label: 'Mettre à jour'
@@ -9,5 +10,6 @@
   <a class="btn btn-secondary mt-3" href="{{ path('app_admin_dashboard') }}">
     Annuler
   </a>
+  {# Inclusion du partial de suppression d’une UE #}
   {{ include('ue_admin/_delete_form.html.twig', {ue: u_e}) }}
 {% endblock %}

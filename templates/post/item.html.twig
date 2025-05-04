@@ -1,16 +1,21 @@
+{# Verifie si le post contient un fichier ou non#}
 {% set isFile = post.files|length > 0 %}
+{# Choisi l'icone et la bordure en fonction du type de post #}
 {% set icon   = isFile ? 'bi bi-file-earmark' : 'bi bi-chat-left-text' %}
 {% set card   = isFile ? 'border-primary'     : 'border-success'      %}
 
+{# Post #}
 <article class="card {{ card }} shadow-sm"
          id="post-{{ post.id }}"
          data-post-id="{{ post.id }}">
   <div class="card-body">
-
+    {# Affichage icone, lien fichier et le msg #}
     <p class="mb-1 fw-semibold">
       <i class="{{ icon }} me-1"></i>
+      {# S'il y a un fichier, on affiche le lien de téléchargement #}
       {% if isFile %}
         Partage de fichier :
+        {# Extrait le nom du fichier depuis le chemin #}
         {% set fileName = post.files|first.filePath|split('/')|last %}
         {# TODO:::::::::::: ADD ICON HERE #}
         <a class="text-primary text-decoration-underline"
@@ -18,17 +23,20 @@
           {{ fileName }}
         </a>
       {% endif %}
+      {# Affichage du message}
         Message :
         <span class="text-success">
           {{ post.message|u.truncate(80, '…') }}
         </span>
     </p>
 
+    {# Affichage de l'auteur et la date du post #}
     <small class="text-muted">
       {{ post.userId.name }} {{ post.userId.surname }}
       – {{ post.date|date('d/m/Y H:i') }}
     </small>
 
+    {# Si l'utilisateur a le rôle enseignant, on affiche les boutons Modifier et Supprimer #}
     {% if is_granted('ROLE_TEACHER') %}
       <div class="btn-group btn-group-sm float-end">
         <a class="btn btn-outline-secondary modifier-buttons"
@@ -36,6 +44,7 @@
            data-post-id = "{{ post.id }}" >
           Modifier
         </a>
+        
         {% include 'post/_delete_form.html.twig' with { post: post } only %}
       </div>
     {% endif %}

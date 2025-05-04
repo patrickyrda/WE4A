@@ -34,8 +34,10 @@ final class UEAdminController extends AbstractController{
     #[Route('/ue/admin',name: 'app_u_e_admin_index', methods: ['GET'])]
     public function index(UERepository $ueRepository, Request $request): Response
     {
+        // On recupere les ue dans la bdd
         $ues = $ueRepository->findAll();
 
+        // On verifie pour une requete AJAX
         if ($request->isXmlHttpRequest()) {
             // rendu du partial uniquement
             $html = $this->renderView('ue_admin/_table.html.twig', [
@@ -47,6 +49,7 @@ final class UEAdminController extends AbstractController{
                 'html'    => $html,
             ]);
         }
+        // Si c'est pas une requete AJAX, on renvoie la page complete
         return $this->render('ue_admin/index.html.twig', [
             'u_es' => $ues,
         ]);
@@ -62,10 +65,12 @@ final class UEAdminController extends AbstractController{
     #[Route('ue/new', name: 'app_u_e_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
+
         $uE = new UE();
         $form = $this->createForm(UEType::class, $uE);
         $form->handleRequest($request);
 
+        // On traite le formulaire
         if ($form->isSubmitted() && $form->isValid()) {
 
             $imageFile = $form->get('image_path')->getData();
@@ -94,13 +99,12 @@ final class UEAdminController extends AbstractController{
 
             $entityManager->persist($uE);
             $entityManager->flush();
-            
             return $this->json([
                 'success' => true,
                 'message' => 'UE created successfully']);
         }
 
-        
+        // On revoie le fragment HTML du formulaire
         return $this->json([
             'form' => $this->renderView('ue_admin/_form.html.twig', [
                 'u_e' => $uE,
@@ -117,7 +121,8 @@ final class UEAdminController extends AbstractController{
 
     #[Route('ue/{id}', name: 'app_u_e_admin_show', methods: ['GET'])]
     public function show(UE $uE, UserRepository $userRepository): Response
-    {
+    {   
+        // On recupere les id des utilisateurs inscrits
         $enrolledIds = array_map(
             fn($ins) => $ins->getUserId()->getId(),
             $uE->getInscriptions()->toArray()
@@ -133,6 +138,7 @@ final class UEAdminController extends AbstractController{
             ->getQuery()
             ->getResult();
 
+        // On renvoie la page avec les ue et la liste des étudiants
         return $this->render('ue_admin/show.html.twig', [
             'u_e' => $uE,
             'availableStudents' => $availableStudents,
@@ -150,9 +156,11 @@ final class UEAdminController extends AbstractController{
     #[Route('ue/{id}/edit', name: 'app_u_e_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, UE $uE, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
+        // On cree le formulaire pre rempli
         $form = $this->createForm(UEType::class, $uE);
         $form->handleRequest($request);
 
+        // On verifie si le formulaire a été soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
             
             $imageFile = $form->get('image_path')->getData();
@@ -191,7 +199,8 @@ final class UEAdminController extends AbstractController{
                 'success' => true,
                 'message' => 'UE updated successfully']);
         }
-
+        
+        // SInon on revoie le fragment HTML du formulaire
         return $this->json([
             'form' => $this->renderView('ue_admin/_form.html.twig', [
                 'u_e' => $uE,

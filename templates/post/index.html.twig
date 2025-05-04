@@ -3,6 +3,7 @@
 {% block title %}Post index{% endblock %}
 
 {% block body %}
+    {# Navbar en haut de l'ecran #}
     <div class="bandeau">
         <a class="connexion" href="#">Mes cours</a>
     </div>
@@ -18,17 +19,21 @@
             </tr>
         </thead>
         <tbody>
+        {# Boucle sur les posts #}
         {% for post in posts %}
             <tr>
                 <td>{{ post.id }}</td>
                 <td>{{ post.message }}</td>
                 <td>{{ post.date ? post.date|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
+                    {# Lien pour afficher detail du post #}
                     <a href="{{ path('app_post_show', {'id': post.id}) }}" class="modify-item">show</a>
+                    {# Lien pour modifier le post #}
                     <a href="{{ path('app_post_edit', {'id': post.id}) }}" class="modify-item">edit</a>
                 </td>
             </tr>
         {% else %}
+        {# Message si aucun post trouvé #}
             <tr>
                 <td colspan="4">no records found</td>
             </tr>
@@ -36,6 +41,7 @@
         </tbody>
     </table>
 
+    {# Bouton pour création d'un nouveau post #}
     <a href="{{ path('app_post_new') }}" class="button">Create new</a>
     </div>
 {% endblock %}

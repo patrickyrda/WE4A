@@ -1,11 +1,17 @@
+{# Affichage d'un post #}
 <article class="card shadow-sm">
   <div class="card-body">
+    {# On recupere l'auteur et l'ue asssociés au post#}
     {% set auteur = post.userId %}
     {% set ue     = post.ueId %}
 
+    {# On affiche le lien vers le fichier si il y en a un #}
     {% if post.files|length > 0 %}
+      {# Prend le premier fichier #}
       {% set fichier    = post.files|first %}
+      {# Extraction le nom du fichier #}
       {% set nomFichier = fichier.filePath|split('/')|last %}
+      {# Texte affiché dans le feed dans le cas d'un upload de fichier #}
       <p class="mb-1">
         <strong>{{ auteur.name }} {{ auteur.surname }}</strong>
         a posté un nouveau fichier,
@@ -13,6 +19,7 @@
         dans <strong>{{ ue.title }}</strong>.
       </p>
     {% else %}
+    {# Texte affiché dans le feed dans le cas d'un upload d'un message #}
       <p class="mb-1">
         <strong>{{ auteur.name }} {{ auteur.surname }}</strong>
         a posté un nouveau message

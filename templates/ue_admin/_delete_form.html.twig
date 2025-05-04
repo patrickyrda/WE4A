@@ -1,14 +1,19 @@
+{# Formulaire de suppresion d'ue #}
 <form
     method="post"
+    {# Route vers l'action de suppression avec l'id et l'ue#}
     action="{{ path('app_u_e_admin_delete', {'id': ue.id}) }}"
+
     class="ajax-delete-form-ue"
     data-ue-id="{{ ue.id }}"
->
+    >
+    {# Champ caché avec le token CSRF#}
     <input
         type="hidden"
         name="_token"
         value="{{ csrf_token('delete' ~ ue.id) }}"
     >
+    {# Bouton declenchant la suppression après confirmation #}
     <button type="submit" class="btn btn-sm btn-danger">
         Supprimer
     </button>

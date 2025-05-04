@@ -5,6 +5,7 @@
       data-post-id="{{ post.id }}"
       >
 
+  {# Token CSRF pour la sécuriser la suppresion #}
   <input type="hidden"
          name="_token"
          value="{{ csrf_token('delete' ~ post.id) }}">

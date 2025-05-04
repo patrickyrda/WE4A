@@ -21,51 +21,59 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  */
 #[IsGranted('ROLE_ADMIN')]
 final class UserAdminController extends AbstractController{
-
     /**
      * This is the API responsible for sending the html table with the list of users.
      * It does not return the full page, only the table. The table is rendered by javascript in the front end, to allow the dynamical loading of the tables in the Admin page.
      * It returns the html table as a json response.
      * 
      */
+
     #[Route('/user/admin', name: 'app_user_admin_index')]
     public function index(UserRepository $userRepository, Request $request): Response
     {   
+        // On recupere les utilisateurs dans la bdd
         $users = $userRepository->findAll();;
+        // On renvoie le fragment de la table HTML
         if ($request->isXmlHttpRequest()) {
             $html = $this->renderView('user_admin/_table.html.twig', [
                 'users' => $users,
             ]);
-    
+            
             return $this->json([
                 'success' => true,
                 'html'    => $html,
             ]);
         }
-    
+        // On renvoie la page complete si ce n'est pas une requete AJAX
         return $this->render('user_admin/index.html.twig', [
             'users' => $users,
         ]);
     }
+
 
     /**
      * This is the API responsible for creating a new user.
      * When receiving a GET request, it returns the html form to be displayed in the modal.
      * When receiving a POST request, it handles the form submission and creates the new user.
      */
+
     #[Route('user/new', name: 'app_user_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = new User();
+        // On crée et traite le formulaire
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-
+        // On verifie si le formulaire est soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
+            // On recupere le mot de passe
             $plainPassword = $form->get('plainPassword')->getData();
+            // On verifie si le mot de passe est vide, si oui on lui donne une valeur par defaut
             if (!$plainPassword) {
                 // Set a default password for the user creation 
                 $plainPassword = 'password120';
             }
+            // On hash le mot de passe
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $entityManager->persist($user);
             $entityManager->flush();
@@ -91,21 +99,25 @@ final class UserAdminController extends AbstractController{
     }
 
 
+// On affiche les details d'un utilisateur
 #[Route('user/{id}', name: 'app_user_admin_show', methods: ['GET'])]
 public function show(User $user, Request $request): Response
 {
+    // On verifie si c'est une requete AJAX
     if ($request->isXmlHttpRequest()) {
+        // On renvoie le fragment HTML du modal
         return $this->json([
             'content' => $this->renderView('user_admin/show.html.twig', [
                 'user' => $user,
             ])
         ]);
     }
-
+    // On renvoie la page complete si ce n'est pas une requete AJAX
     return $this->render('user_admin/show.html.twig', [
         'user' => $user,
     ]);
 }
+
     /**
      * This is the API responsible for updating a user.
      * When receiving a GET request, it returns the html form to be displayed in the modal.
@@ -113,12 +125,13 @@ public function show(User $user, Request $request): Response
      * Modification of the password is optional. If the password is not changed, it will not be updated.
      * The password is hashed before being saved to the database.
      */
+
     #[Route('user/{id}/edit', name: 'app_user_admin_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {
+        // On crée et traite le formulaire
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             
             $plainPassword = $form->get('plainPassword')->getData();

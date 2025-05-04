@@ -1,3 +1,4 @@
+{# Affichage vue detaillée d'une ue pour étudiant#}
 {% extends 'base.html.twig' %}
 {% block title %}{{ u_e.code }} – {{ u_e.title }}{% endblock %}
 {% block head %}
@@ -7,13 +8,14 @@
     <div class="bandeau">
         <a class="connexion" href="{{ path('app_user_dashboard') }}">Mes cours</a>
     </div>
+{# Conteneur principal de la vue UE #}
 <div class="container">
     <div class="rectangle">
+      {# En-tete avec code, le titre et le bouton de création#}
    <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">
       {{ u_e.code }} – {{ u_e.title }}
     </h1>
-
     {% if is_granted('ROLE_TEACHER') %}
       <a class="btn btn-primary"
         id="create-post-btn"
@@ -23,6 +25,7 @@
       </a>
     {% endif %}
   </div>
+  {# Bouton pour afficher/cacher la liste des participants #}
   <button
     class="btn btn-info"
     type="button"
@@ -33,6 +36,7 @@
   >
     Afficher les participants
   </button>
+  {# Tableau des participants en zone collapse #}
   <div class="collapse" id="participants">
   <div id="teachers-section">
     <h5>Enseignants</h5>
@@ -51,6 +55,7 @@
     </table>
   </div>
 
+<<<<<<< HEAD
   <div id="students-section" class="mt-4">
     <h5>Étudiants</h5>
     <table class="table table-striped">
@@ -69,12 +74,16 @@
   </div>
 </div>
 
+=======
+  {# Section affichant tous les posts de l’UE #}
+>>>>>>> origin/definitivebranch
   <section class="mt-5">
     <a class="btn btn-secondary mt-4"
      href="{{ path('app_user_dashboard') }}">
     ← Retour au tableau de bord
     </a>
     <h2 class="h5 mb-3">Tous les posts</h2>
+    {# Conteneur Stimulus pour la liste des posts #}
     <div class="posts-list"
          data-controller="post"
          data-post-target="list">
@@ -87,11 +96,17 @@
   </section>
     </div>
 </div>
+
+{# On ajoute les modals partiels pour crée et modifier les posts#}
 {% include 'ue_dashboard/modal.html.twig' %}
 {% include 'ue_dashboard/editmodal.html.twig' %}
 <script></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<<<<<<< HEAD
 
+=======
+{# Sciprt principal pour l'ouverture, submit et edit du post #}
+>>>>>>> origin/definitivebranch
 <script>
 //Handle participants list data
 document.addEventListener('DOMContentLoaded', () => {
@@ -189,8 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(error => console.error('Error fetching form:', error));
   });
+<<<<<<< HEAD
 
   //Event listener for the modal of saving a post
+=======
+  {# Submit du formulaire de création de post #}
+>>>>>>> origin/definitivebranch
   document.getElementById('savePost').addEventListener('click', function () {
   const form = document.querySelector('#modalContent form');
   const formData = new FormData(form);
@@ -226,7 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentPostId = 0;
 
+
 //Event listener for modifying a post
+
 function addModifierButtonListener() {
 
     const buttons = document.querySelectorAll('.modifier-buttons');
@@ -263,7 +284,9 @@ function addModifierButtonListener() {
     });
   }
 
+
   //Evenet listener on the button to save a post
+
   document.getElementById('modifyPost').addEventListener('click', function () {
   const form = document.querySelector('#modalContentEdit form');
   const formData = new FormData(form);

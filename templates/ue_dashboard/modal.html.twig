@@ -1,4 +1,5 @@
 {# templates/modal.html.twig #}
+{# Modal bootstrap pour créer ou editer un post #}
 <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -6,9 +7,11 @@
         <h5 class="modal-title" id="postModalLabel">Créer un Nouveau Post</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      {# Corps du modal où le contenu du formulaire sera injecté dynamiquement #}
       <div class="modal-body" id="modalContent">
         <!-- Form content will be inserted here -->
       </div>
+      {# Pied de page du modal avec boutons d’action #}
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="savePost">Save Post</button>
